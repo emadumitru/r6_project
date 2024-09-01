@@ -1,4 +1,5 @@
 import streamlit as st
+from form_ranked import *
 
 # Define lists for the dropdown menus
 maps = [
@@ -28,10 +29,4 @@ st.write(f"**Map:** {selected_map}")
 st.write(f"**Game Type:** {selected_game_type}")
 st.write(f"**Starting Side:** {selected_side}")
 
-st.write(
-    """
-    Use the sidebar to configure the match settings. 
-    Once you have selected your map, game type, and starting side, 
-    you can begin tracking your matches.
-    """
-)
+ranked_input_form()
