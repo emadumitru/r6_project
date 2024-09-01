@@ -1,0 +1,3 @@
+python -m venv r6_environment
+r6_environment\Scripts\activate
+pip install -r requirements.txt
