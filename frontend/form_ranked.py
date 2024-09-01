@@ -3,6 +3,10 @@ import json
 import os
 from st_clickable_images import clickable_images
 
+def add_space(spaces):
+    for _ in range(spaces):
+        st.write("")
+
 # Paths to the JSON files containing attacker and defender data
 attackers_json_path = 'data/attackers.json'
 defenders_json_path = 'data/defenders.json'
@@ -22,22 +26,24 @@ defenders = load_operators(defenders_json_path)
 
 # Function to display operator selection using clickable images
 def display_operator_selection(player_name, operators_dict):
-    st.subheader(f"{player_name}'s Round Performance")
+    st.subheader(f"{player_name}'s Round")
 
+    st.write("##### Operator")
     # Initialize selected operator with a default value if not set
     if f"{player_name}_selected_operator" not in st.session_state:
         st.session_state[f"{player_name}_selected_operator"] = None
 
     # Prepare image paths for clickable images
-    images = [operators_dict[name] for name in operators_dict]
     operator_names = list(operators_dict.keys())
 
+    images = [operators_dict[name] for name in operator_names]
+    
     # Display clickable images and get the index of the clicked image
     clicked = clickable_images(
         images,
         titles=operator_names,
         div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-        img_style={"margin": "5px", "height": "100px", "cursor": "pointer"},
+        img_style={"margin": "3px", "height": "75px", "cursor": "pointer"},
         key=f"{player_name}_clickable_images",
     )
 
@@ -49,13 +55,16 @@ def display_operator_selection(player_name, operators_dict):
     # Show the currently selected operator
     selected_operator = st.session_state[f"{player_name}_selected_operator"]
     if selected_operator:
-        st.write(f"Selected Operator: {selected_operator}")
+        st.write(f"Selected Operator: **{selected_operator}**")
 
+    st.divider()
+    st.write("##### Performance")
+    
     # Kills section
-    kills = st.selectbox(f"{player_name}'s Kills", list(range(6)))
+    kills = st.select_slider(f"{player_name}'s Kills", list(range(6)))
 
     # Survived section
-    survived = st.radio(f"Did {player_name} Survive?", ["Yes", "No"])
+    survived = st.checkbox(f"Did {player_name} Survive?")
 
     return {
         "operator": selected_operator,
@@ -69,21 +78,27 @@ def ranked_input_form():
 
     # Main input form
     st.header("Input Round Data")
+    
+    col1, col2 = st.columns(2)
 
-    # Side Selection
-    side = st.radio("Side", ["Attack", "Defense"])
+    with col1:
+        # Side Selection
+        side = st.radio("Side", ["Attack", "Defense"], horizontal=True)
 
-    # Round Win/Loss
-    round_win = st.radio("Round Result", ["Win", "Lose"])
+        # Round Win/Loss
+        round_win = st.radio("Round Result", ["Win", "Lose"],horizontal=True)
 
-    # End Condition
-    end_condition = st.selectbox(
-        "End Condition", ["Timed Out", "Wiped Out", "Defused"]
-    )
+    with col2:
+        # End Condition
+        end_condition = st.radio(
+            "End Condition", ["Timed Out", "Wiped Out", "Defused"], horizontal=True
+        )
 
-    # Site played
-    sites = ["Site 1", "Site 2", "Site 3", "Site 4"]
-    site_played = st.selectbox("Site Played", sites)
+        # Site played
+        sites = ["Site 1", "Site 2", "Site 3", "Site 4"]
+        site_played = st.radio("Site Played", sites, horizontal=True)
+        
+    st.divider()
 
     # Use the appropriate dictionary based on the selected side
     if side == "Attack":
@@ -92,27 +107,41 @@ def ranked_input_form():
         operator_dict = defenders
 
     # Input sections for Ema and Mihnea using the loaded dictionaries
-    ema_data = display_operator_selection("Ema", operator_dict)
-    mihnea_data = display_operator_selection("Mihnea", operator_dict)
-
+    col1, col2 = st.columns(2)
+    with col1:
+        ema_data = display_operator_selection("Ema", operator_dict)
+    with col2:
+        mihnea_data = display_operator_selection("Mihnea", operator_dict)
+    
+    add_space(2)
+    
     # Submit Button
     if st.button("Submit Round Data"):
-        # Display submitted data (for testing purposes)
         st.write("### Round Summary")
-        st.write(f"**Side:** {side}")
-        st.write(f"**Round Result:** {round_win}")
-        st.write(f"**End Condition:** {end_condition}")
-        st.write(f"**Site Played:** {site_played}")
+        col1, col2 = st.columns(2)
+        
+        with col1:
 
-        st.write("#### Ema's Performance")
-        st.write(f"Operator: {ema_data['operator']}")
-        st.write(f"Kills: {ema_data['kills']}")
-        st.write(f"Survived: {ema_data['survived']}")
+            # Display submitted data (for testing purposes)
+            
+            st.write(f"**Side:** {side}")
+            st.write(f"**Round Result:** {round_win}")
+            
+            st.write("#### Ema's Performance")
+            st.write(f"Operator: {ema_data['operator']}")
+            st.write(f"Kills: {ema_data['kills']}")
+            st.write(f"Survived: {ema_data['survived']}")
+            
+        with col2:
+            st.write(f"**End Condition:** {end_condition}")
+            st.write(f"**Site Played:** {site_played}")
 
-        st.write("#### Mihnea's Performance")
-        st.write(f"Operator: {mihnea_data['operator']}")
-        st.write(f"Kills: {mihnea_data['kills']}")
-        st.write(f"Survived: {mihnea_data['survived']}")
+            
+
+            st.write("#### Mihnea's Performance")
+            st.write(f"Operator: {mihnea_data['operator']}")
+            st.write(f"Kills: {mihnea_data['kills']}")
+            st.write(f"Survived: {mihnea_data['survived']}")
 
         # Logic to save the data goes here
         st.success("Round data submitted successfully!")

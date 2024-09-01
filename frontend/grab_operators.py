@@ -14,7 +14,7 @@ def get_operators(directory):
             # Extract the operator name by removing the prefix and extension
             operator_name = filename.split('-')[1].replace('.png', '')
             # Store the operator name and corresponding image path
-            operators[operator_name.capitalize()] = os.path.join(directory, filename)
+            operators[operator_name.capitalize()] = f"https://r6operators.marcopixel.eu/icons/svg/{operator_name.lower()}.svg"
     return operators
 
 # Get dictionaries of attackers and defenders
