@@ -1,9 +1,7 @@
 import streamlit as st
 import json
 import os
-import base64
 from st_clickable_images import clickable_images
-
 
 # Paths to the JSON files containing attacker and defender data
 attackers_json_path = 'data/attackers.json'
@@ -18,11 +16,6 @@ def load_operators(json_path):
         st.error(f"File not found: {json_path}")
         return {}
 
-# Function to encode image to base64
-def get_base64_image(image_path):
-    with open(image_path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode('utf-8')
-
 # Load attacker and defender operators from JSON files
 attackers = load_operators(attackers_json_path)
 defenders = load_operators(defenders_json_path)
@@ -35,8 +28,8 @@ def display_operator_selection(player_name, operators_dict):
     if f"{player_name}_selected_operator" not in st.session_state:
         st.session_state[f"{player_name}_selected_operator"] = None
 
-    # Prepare image paths in base64 format for clickable images
-    images = [f"data:image/png;base64,{get_base64_image(operators_dict[name])}" for name in operators_dict]
+    # Prepare image paths for clickable images
+    images = [operators_dict[name] for name in operators_dict]
     operator_names = list(operators_dict.keys())
 
     # Display clickable images and get the index of the clicked image
@@ -70,12 +63,7 @@ def display_operator_selection(player_name, operators_dict):
         "survived": survived == "Yes",
     }
 
-
-
-
-
 def ranked_input_form():
-
     # Sidebar configuration (optional if you want a different setup)
     st.sidebar.header("Round Data Input")
 
