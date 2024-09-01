@@ -1,32 +1,47 @@
 import pandas as pd
 import pickle
-from support_functions import get_relative_path
+from class_map import Rmap
+from support_functions import *
 
 class Recommender:
     def __init__(self):
         self.games = {}
         self.rounds = {}
         self.maps = {}
-        self.lid_game = self.last_id(self.games)
-        self.lid_round = self.last_id(self.rounds)
 
     def last_id(self, data):
         if data:
             return max(data.keys())
         return 0
     
+    def add_game(self, game):
+        game_id = self.last_id(self.games) + 1
+        game.id = game_id
+        self.games[game_id] = game
+        for round in game.rounds.values():
+            id_round = self.last_id(self.rounds) + 1
+            round.id = id_round
+            self.rounds[id_round] = round
+        map_name = game.map_name
+        if map_name not in self.maps:
+            self.maps[map_name] = Rmap(map_name, [])
+        self.maps[game.map_name].update_map(game)
+
+    
     def load_old_data(self, csv_name='r6_games.csv', directory='data'):
         path = get_relative_path(csv_name, directory, __file__)
 
-        print(path)
         with open(path, 'r', encoding='utf-8') as file:
-            # print first line
-            print(file.readline())
-
             next(file)
             for line in file:
-                continue
-            ##TODO: transform data and add to class variables
+                try:
+                    input_data = read_old_csv_line(line)
+                    clean_input_data = clean_format(input_data)
+                    game = create_game_and_rounds(clean_input_data)
+                    self.add_game(game)
+                except Exception as e:
+                    print(f'Error: {e}')
+                    print(f'Line: {line}')
 
     def save_to_csv(self, csv_name='csv_games.csv', directory='data'):
         path = get_relative_path(csv_name, directory, __file__)
@@ -55,3 +70,8 @@ class Recommender:
 if __name__ == '__main__':
     rec = Recommender()
     rec.load_old_data()
+    print(len(rec.games))
+
+    print(len(rec.rounds))
+    for key, value in rec.maps.items():
+        print(value)
