@@ -21,13 +21,13 @@ class Recommender:
         for round in game.rounds.values():
             id_round = self.last_id(self.rounds) + 1
             round.id = id_round
+            round.game_id = game_id
             self.rounds[id_round] = round
         map_name = game.map_name
         if map_name not in self.maps:
             self.maps[map_name] = Rmap(map_name, [])
         self.maps[game.map_name].update_map(game)
 
-    
     def load_old_data(self, csv_name='r6_games.csv', directory='data'):
         path = get_relative_path(csv_name, directory, __file__)
 
@@ -73,5 +73,10 @@ if __name__ == '__main__':
     print(len(rec.games))
 
     print(len(rec.rounds))
-    for key, value in rec.maps.items():
-        print(value)
+    print(rec.maps.keys())
+
+    rec = old_input_clean_data(rec)
+
+    print(rec.maps.keys())
+    print(rec.maps.values())
+

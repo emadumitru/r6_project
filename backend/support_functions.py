@@ -10,7 +10,223 @@ def get_relative_path(target_file, directory='data', curent_file=__file__):
     path = os.path.join(data_dir, target_file)
     return path
 
+def determine_round_type(gtype, round_number, roundwins):
+    """
+    Determine the type of the round based on the game type and round number.
 
+    :param gtype: A string representing the game type.
+    :param round_number: An integer representing the round number.
+    :param roundwins: A list of booleans representing the round wins.
+    :return: A string representing the round type.
+    """
+    if gtype == 'ranked':
+        if round_number in [7, 9]:
+            return 'overtime'
+        elif roundwins.count(True) == 4:
+            return 'matchpoint-us'
+        elif roundwins.count(False) == 4:
+            return 'matchpoint-op'
+        elif roundwins.count(True) == 3:
+            return 'matchpoint-us'
+        elif roundwins.count(False) == 3:
+            return 'matchpoint-op'
+        else:
+            return 'normal'
+    if gtype == 'standard':
+        if round_number == 7:
+            return 'overtime'
+        elif roundwins.count(True) == 3:
+            return 'matchpoint-us'
+        elif roundwins.count(False) == 3:
+            return 'matchpoint-op'
+        else:
+            return 'normal'
+    if gtype == 'quick':
+        if round_number == 5:
+            return 'overtime'
+        elif roundwins.count(True) == 2:
+            return 'matchpoint-us'
+        elif roundwins.count(False) == 2:
+            return 'matchpoint-op'
+        else:
+            return 'normal'
+
+def create_game_and_rounds(input_dict):
+    """
+    Create Game and Round objects based on a flat input dictionary.
+
+    :param input_dict: dictionary with game and rounds data in a single level.
+    :return: Game object
+    """
+    game_id = 0
+    round_id = 0
+
+    # Extract game level data
+    date = input_dict['date']
+    map_name = input_dict['map_name']
+    game_win = input_dict['game_win']
+    ban_a_us = input_dict['ban_a_us']
+    ban_a_op = input_dict['ban_a_op']
+    ban_d_us = input_dict['ban_d_us']
+    ban_d_op = input_dict['ban_d_op']
+    gtype = input_dict['gtype']
+    nrounds = input_dict['nrounds']
+    score_us = input_dict['score_us']
+    score_op = input_dict['score_op']
+
+    # Initialize rounds dictionary
+    rounds = {}
+    round_wins = [input_dict[f'round_{i}_win'] for i in range(1, nrounds + 1)]
+
+    # Create rounds based on available rounds in input_dict
+    for i in range(1, nrounds + 1):
+        # Extract round-specific data
+        round_number = input_dict[f'round_{i}_number']
+        site = input_dict[f'round_{i}_site']
+        side = input_dict[f'round_{i}_side']
+        win = input_dict[f'round_{i}_win']
+        rtype = determine_round_type(gtype, round_number, round_wins)
+        endcondition = input_dict[f'round_{i}_endcondition']
+        round_date = input_dict[f'round_{i}_date']
+
+        # Extract player-specific data for this round
+        round_data = {
+            'site': site,
+            'side': side,
+            'win': win,
+            'rtype': rtype,
+            'endcondition': endcondition,
+            'date': round_date,
+            # Player 'ema' data
+            'ema_opperator': input_dict[f'ema_round_{i}_opperator'],
+            'ema_kills': input_dict[f'ema_round_{i}_kills'],
+            'ema_assists': input_dict[f'ema_round_{i}_assists'],
+            'ema_survived': input_dict[f'ema_round_{i}_survived'],
+            'ema_entryfrag': input_dict[f'ema_round_{i}_entryfrag'],
+            'ema_diffuser': input_dict[f'ema_round_{i}_diffuser'],
+            'ema_cluth': input_dict[f'ema_round_{i}_cluth'],
+            # Player 'mihnea' data
+            'mihnea_opperator': input_dict[f'mihnea_round_{i}_opperator'],
+            'mihnea_kills': input_dict[f'mihnea_round_{i}_kills'],
+            'mihnea_assists': input_dict[f'mihnea_round_{i}_assists'],
+            'mihnea_survived': input_dict[f'mihnea_round_{i}_survived'],
+            'mihnea_entryfrag': input_dict[f'mihnea_round_{i}_entryfrag'],
+            'mihnea_diffuser': input_dict[f'mihnea_round_{i}_diffuser'],
+            'mihnea_cluth': input_dict[f'mihnea_round_{i}_cluth']
+        }
+
+        # Create Round object and add to rounds dictionary
+        round_obj = Round(round_id, game_id, round_number, round_data)
+        rounds[round_id] = round_obj
+        round_id += 1
+
+    # Create the game_data dictionary to pass to the Game constructor
+    game_data = {
+        'date': date,
+        'map_name': map_name,
+        'game_win': game_win,
+        'ban_a_us': ban_a_us,
+        'ban_a_op': ban_a_op,
+        'ban_d_us': ban_d_us,
+        'ban_d_op': ban_d_op,
+        'gtype': gtype,
+        'nrounds': nrounds,
+        'score_us': score_us,
+        'score_op': score_op
+    }
+
+    # Create Game object
+    game_obj = Game(game_id, rounds, game_data)
+
+    return game_obj
+
+def form_input_clean(input_dict):
+    """
+    Cleans and formats the input dictionary to ensure all values are in the correct type
+    or assigns None if the conversion fails.
+
+    :param input_dict: A dictionary formatted for create_game_and_rounds function.
+    :return: A cleaned and formatted dictionary.
+    """
+    def to_int(value):
+        """Convert to integer or return None if conversion fails."""
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+    def to_bool(value):
+        """Convert to boolean based on specific values or return None if not applicable."""
+        if value in ['1', 1, 'True', True]:
+            return True
+        elif value in ['0', 0, 'False', False]:
+            return False
+        else:
+            return None
+
+    def to_str(value):
+        """Convert to string or return None if conversion fails."""
+        try:
+            return str(value) if value is not None else None
+        except (TypeError, ValueError):
+            return None
+        
+    def to_date(value):
+        """Convert to datetime.date or return None if conversion fails."""
+        try:
+            return datetime.date(value, '%m/%d/%Y') if value else None
+        except (TypeError, ValueError):
+            return None
+
+    # Clean game-level data
+    cleaned_dict = {
+        'date': to_date(input_dict.get('date')),
+        'map_name': to_str(input_dict.get('map_name')),
+        'game_win': to_bool(input_dict.get('game_win')),
+        'ban_a_us': to_str(input_dict.get('ban_a_us')),
+        'ban_a_op': to_str(input_dict.get('ban_a_op')),
+        'ban_d_us': to_str(input_dict.get('ban_d_us')),
+        'ban_d_op': to_str(input_dict.get('ban_d_op')),
+        'gtype': to_str(input_dict.get('gtype')),
+        'nrounds': to_int(input_dict.get('nrounds')),
+        'score_us': to_int(input_dict.get('score_us')),
+        'score_op': to_int(input_dict.get('score_op')),
+    }
+
+    # Clean round-specific and player-specific data
+    for i in range(1, cleaned_dict['nrounds'] + 1):
+        # Round-specific keys
+        cleaned_dict[f'round_{i}_number'] = i
+        cleaned_dict[f'round_{i}_site'] = to_str(input_dict.get(f'round_{i}_site'))
+        cleaned_dict[f'round_{i}_side'] = to_str(input_dict.get(f'round_{i}_side'))
+        cleaned_dict[f'round_{i}_win'] = to_bool(input_dict.get(f'round_{i}_win'))
+        cleaned_dict[f'round_{i}_endcondition'] = to_str(input_dict.get(f'round_{i}_endcondition'))
+        cleaned_dict[f'round_{i}_date'] = cleaned_dict['date']
+
+        # Player-specific keys for 'ema'
+        cleaned_dict[f'ema_round_{i}_opperator'] = to_str(input_dict.get(f'ema_round_{i}_opperator'))
+        cleaned_dict[f'ema_round_{i}_kills'] = to_int(input_dict.get(f'ema_round_{i}_kills'))
+        cleaned_dict[f'ema_round_{i}_assists'] = to_int(input_dict.get(f'ema_round_{i}_assists'))
+        cleaned_dict[f'ema_round_{i}_survived'] = to_bool(input_dict.get(f'ema_round_{i}_survived'))
+        cleaned_dict[f'ema_round_{i}_entryfrag'] = to_bool(input_dict.get(f'ema_round_{i}_entryfrag'))
+        cleaned_dict[f'ema_round_{i}_diffuser'] = to_bool(input_dict.get(f'ema_round_{i}_diffuser'))
+        cleaned_dict[f'ema_round_{i}_cluth'] = to_bool(input_dict.get(f'ema_round_{i}_cluth'))
+
+        # Player-specific keys for 'mihnea'
+        cleaned_dict[f'mihnea_round_{i}_opperator'] = to_str(input_dict.get(f'mihnea_round_{i}_opperator'))
+        cleaned_dict[f'mihnea_round_{i}_kills'] = to_int(input_dict.get(f'mihnea_round_{i}_kills'))
+        cleaned_dict[f'mihnea_round_{i}_assists'] = to_int(input_dict.get(f'mihnea_round_{i}_assists'))
+        cleaned_dict[f'mihnea_round_{i}_survived'] = to_bool(input_dict.get(f'mihnea_round_{i}_survived'))
+        cleaned_dict[f'mihnea_round_{i}_entryfrag'] = to_bool(input_dict.get(f'mihnea_round_{i}_entryfrag'))
+        cleaned_dict[f'mihnea_round_{i}_diffuser'] = to_bool(input_dict.get(f'mihnea_round_{i}_diffuser'))
+        cleaned_dict[f'mihnea_round_{i}_cluth'] = to_bool(input_dict.get(f'mihnea_round_{i}_cluth'))
+
+    return cleaned_dict
+
+
+
+
+## Functions for OLD CSV data processing
 def read_old_csv_line(line):
     """
     Reads an old CSV line, splits it by commas, and maps existing columns 
@@ -193,90 +409,22 @@ def clean_format(input_dict):
 
     return cleaned_dict
 
-def create_game_and_rounds(input_dict):
-    """
-    Create Game and Round objects based on a flat input dictionary.
+def old_input_clean_data(rec):
+    # rec had dictionaries with games, rounds, maps
 
-    :param input_dict: dictionary with game and rounds data in a single level.
-    :return: Game object
-    """
-    game_id = 0
-    round_id = 0
+    # change map names
+    # map names exist in Map, Game, Site
+    # change in rec.maps, rec.maps.sites, rec.games
+    list_old_names = ['Club House', 'Kafe', 'Emerald', 'Nighthaven']
+    list_new_names = ['Clubhouse', 'Kafe Dostoyevsky', 'Emerald Plains', 'Nighthaven Labs']
 
-    # Extract game level data
-    date = input_dict['date']
-    map_name = input_dict['map_name']
-    game_win = input_dict['game_win']
-    ban_a_us = input_dict['ban_a_us']
-    ban_a_op = input_dict['ban_a_op']
-    ban_d_us = input_dict['ban_d_us']
-    ban_d_op = input_dict['ban_d_op']
-    gtype = input_dict['gtype']
-    nrounds = input_dict['nrounds']
-    score_us = input_dict['score_us']
-    score_op = input_dict['score_op']
+    for old_name, new_name in zip(list_old_names, list_new_names):
+        rec.maps[new_name] = rec.maps.pop(old_name)
+        rec.maps[new_name].name = new_name
+        for site in rec.maps[new_name].sites.values():
+            site.map_name = new_name
+        for game in rec.games.values():
+            if game.map_name == old_name:
+                game.map_name = new_name
 
-    # Initialize rounds dictionary
-    rounds = {}
-
-    # Create rounds based on available rounds in input_dict
-    for i in range(1, nrounds + 1):
-        # Extract round-specific data
-        round_number = input_dict[f'round_{i}_number']
-        site = input_dict[f'round_{i}_site']
-        side = input_dict[f'round_{i}_side']
-        win = input_dict[f'round_{i}_win']
-        rtype = input_dict[f'round_{i}_type']
-        endcondition = input_dict[f'round_{i}_endcondition']
-        round_date = input_dict[f'round_{i}_date']
-
-        # Extract player-specific data for this round
-        round_data = {
-            'site': site,
-            'side': side,
-            'win': win,
-            'rtype': rtype,
-            'endcondition': endcondition,
-            'date': round_date,
-            # Player 'ema' data
-            'ema_opperator': input_dict[f'ema_round_{i}_opperator'],
-            'ema_kills': input_dict[f'ema_round_{i}_kills'],
-            'ema_assists': input_dict[f'ema_round_{i}_assists'],
-            'ema_survived': input_dict[f'ema_round_{i}_survived'],
-            'ema_entryfrag': input_dict[f'ema_round_{i}_entryfrag'],
-            'ema_diffuser': input_dict[f'ema_round_{i}_diffuser'],
-            'ema_cluth': input_dict[f'ema_round_{i}_cluth'],
-            # Player 'mihnea' data
-            'mihnea_opperator': input_dict[f'mihnea_round_{i}_opperator'],
-            'mihnea_kills': input_dict[f'mihnea_round_{i}_kills'],
-            'mihnea_assists': input_dict[f'mihnea_round_{i}_assists'],
-            'mihnea_survived': input_dict[f'mihnea_round_{i}_survived'],
-            'mihnea_entryfrag': input_dict[f'mihnea_round_{i}_entryfrag'],
-            'mihnea_diffuser': input_dict[f'mihnea_round_{i}_diffuser'],
-            'mihnea_cluth': input_dict[f'mihnea_round_{i}_cluth']
-        }
-
-        # Create Round object and add to rounds dictionary
-        round_obj = Round(round_id, game_id, round_number, round_data)
-        rounds[round_id] = round_obj
-        round_id += 1
-
-    # Create the game_data dictionary to pass to the Game constructor
-    game_data = {
-        'date': date,
-        'map_name': map_name,
-        'game_win': game_win,
-        'ban_a_us': ban_a_us,
-        'ban_a_op': ban_a_op,
-        'ban_d_us': ban_d_us,
-        'ban_d_op': ban_d_op,
-        'gtype': gtype,
-        'nrounds': nrounds,
-        'score_us': score_us,
-        'score_op': score_op
-    }
-
-    # Create Game object
-    game_obj = Game(game_id, rounds, game_data)
-
-    return game_obj
+    return rec
