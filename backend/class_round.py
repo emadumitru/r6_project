@@ -1,4 +1,4 @@
-from class_player import PS
+from backend.class_player import PS
 
 class Round:
     def __init__(self, round_id, game_id, round_number, round_data):

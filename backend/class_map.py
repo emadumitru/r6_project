@@ -1,4 +1,4 @@
-from class_site import Site
+from backend.class_site import Site
 
 class Rmap:
     def __init__(self, map_name, site_names):
@@ -21,6 +21,7 @@ class Rmap:
             for side in sides:
                 site_id = f'{site_name}_{side}'
                 self.sites[site_id] = Site(site_id, self.name, site_name, side)
+        print(self.sites)
 
     def update_map(self, game):
         self.games[game.id] = game
@@ -28,6 +29,7 @@ class Rmap:
             self.rounds[round.id] = round
             site_name = f'{round.site}_{round.side}'
             if site_name not in self.sites:
+                print(round.site)
                 self.initialize_sites([round.site])
             self.sites[site_name].add_round(round)
         self.update_statistics(game.win)

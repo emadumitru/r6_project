@@ -1,32 +1,27 @@
 import streamlit as st
 from form_ranked import *
+from tab_round import *
+from app_format import *
 
-# Define lists for the dropdown menus
-maps = [
-    "Bank", "Border", "Chalet", "Clubhouse", "Coastline", 
-    "Consulate", "Favela", "Hereford Base", 
-    "House", "Kafe Dostoyevsky", "Kanal", "Oregon", 
-    "Outback", "Plane", "Skyscraper", "Theme Park", "Tower", 
-    "Villa", "Yacht", "Emerald Plains", "Nighthaven Labs",
-    "Lair", "Stadium"
-]
 
-game_types = ["Standard", "Ranked"]
-sides = ["Attack", "Defense"]
+selected_map, selected_game_type, selected_side, submit_game = recommender_format()
+# rec = load_rec()
+# st.session_state["name_sites"] = get_site_for_map(rec, selected_map)
 
-# Set up the main title
-st.title("Rainbow 6 Siege Match Tracker")
 
-# Sidebar Configuration
-st.sidebar.header("Match Settings")
-selected_map = st.sidebar.selectbox("Select Map", maps)
-selected_game_type = st.sidebar.radio("Game Type", game_types)
-selected_side = st.sidebar.radio("Starting Side", sides)
+print(selected_map, selected_game_type, selected_side, submit_game)
 
-# Main page content
-st.write(f"### Selected Match Settings")
-st.write(f"**Map:** {selected_map}")
-st.write(f"**Game Type:** {selected_game_type}")
-st.write(f"**Starting Side:** {selected_side}")
 
-ranked_input_form()
+
+if submit_game:
+    # create game
+    st.session_state["rounds"] = []
+
+
+st.session_state["name_sites"] = ['kitchen', 'kitchen2', '1F']
+
+tab1, tab2 = st.tabs(["try mihnea", "try ema"])
+with tab1:
+    ranked_input_form()
+with tab2:
+    add_new_round('Attack', 2)

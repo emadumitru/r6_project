@@ -1,7 +1,7 @@
 import os
 import datetime
-from class_round import Round
-from class_game import Game
+from backend.class_round import Round
+from backend.class_game import Game
 
 def get_relative_path(target_file, directory='data', curent_file=__file__):
     curent_dir = os.path.dirname(curent_file)
@@ -87,7 +87,6 @@ def create_game_and_rounds(input_dict):
         win = input_dict[f'round_{i}_win']
         rtype = determine_round_type(gtype, round_number, round_wins)
         endcondition = input_dict[f'round_{i}_endcondition']
-        round_date = input_dict[f'round_{i}_date']
 
         # Extract player-specific data for this round
         round_data = {
@@ -96,7 +95,7 @@ def create_game_and_rounds(input_dict):
             'win': win,
             'rtype': rtype,
             'endcondition': endcondition,
-            'date': round_date,
+            'date': date,
             # Player 'ema' data
             'ema_opperator': input_dict[f'ema_round_{i}_opperator'],
             'ema_kills': input_dict[f'ema_round_{i}_kills'],
@@ -174,7 +173,12 @@ def form_input_clean(input_dict):
     def to_date(value):
         """Convert to datetime.date or return None if conversion fails."""
         try:
-            return datetime.date(value, '%m/%d/%Y') if value else None
+            if type(value) == datetime.date:
+                return value
+            elif type(value) == str:
+                return datetime.datetime.strptime(value, '%m/%d/%Y').date()
+            else:
+                return None
         except (TypeError, ValueError):
             return None
 
@@ -198,7 +202,7 @@ def form_input_clean(input_dict):
         # Round-specific keys
         cleaned_dict[f'round_{i}_number'] = i
         cleaned_dict[f'round_{i}_site'] = to_str(input_dict.get(f'round_{i}_site'))
-        cleaned_dict[f'round_{i}_side'] = to_str(input_dict.get(f'round_{i}_side'))
+        cleaned_dict[f'round_{i}_side'] = to_str(input_dict.get(f'round_{i}_side')).lower()
         cleaned_dict[f'round_{i}_win'] = to_bool(input_dict.get(f'round_{i}_win'))
         cleaned_dict[f'round_{i}_endcondition'] = to_str(input_dict.get(f'round_{i}_endcondition'))
         cleaned_dict[f'round_{i}_date'] = cleaned_dict['date']
@@ -419,7 +423,10 @@ def old_input_clean_data(rec):
     list_new_names = ['Clubhouse', 'Kafe Dostoyevsky', 'Emerald Plains', 'Nighthaven Labs']
 
     for old_name, new_name in zip(list_old_names, list_new_names):
-        rec.maps[new_name] = rec.maps.pop(old_name)
+        try:
+            rec.maps[new_name] = rec.maps.pop(old_name)
+        except KeyError:
+            pass
         rec.maps[new_name].name = new_name
         for site in rec.maps[new_name].sites.values():
             site.map_name = new_name

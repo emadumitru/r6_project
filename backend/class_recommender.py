@@ -1,7 +1,7 @@
 import pandas as pd
 import pickle
-from class_map import Rmap
-from support_functions import *
+from backend.class_map import Rmap
+from backend.support_functions import *
 
 class Recommender:
     def __init__(self):
@@ -68,15 +68,19 @@ class Recommender:
 
 
 if __name__ == '__main__':
-    rec = Recommender()
-    rec.load_old_data()
-    print(len(rec.games))
+    # rec = Recommender()
+    # rec.load_old_data()
+    # print(len(rec.games))
 
-    print(len(rec.rounds))
-    print(rec.maps.keys())
+    # print(len(rec.rounds))
+    # print(rec.maps.keys())
 
-    rec = old_input_clean_data(rec)
+    # rec = old_input_clean_data(rec)
+    # rec = old_input_clean_data(rec)
 
-    print(rec.maps.keys())
-    print(rec.maps.values())
+    # print(rec.maps.keys())
+    # print(rec.maps.values())
+
+    # rec.save()
+    pass
 

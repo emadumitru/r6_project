@@ -64,7 +64,7 @@ game_data = {
 }
 
 form_output = {
-    'date': str,             # Format: %m/%d/%Y, Example: '2024-09-01' - Date of the game
+    'date': str,             # Format: %m/%d/%Y, Example: 
     'map_name': str,         # Example: 'Bank' - Name of the map
     'game_win': bool,        # Example: True - Whether the game was won
     'ban_a_us': str,         # Example: 'Thermite' - Attack ban by user
