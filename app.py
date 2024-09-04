@@ -1,4 +1,6 @@
 import streamlit as st
+# Set page configuration to use the full width of the screen
+st.set_page_config(page_title="R6 Siege Tracker", layout="wide")
 
 from frontend.app_format import *
 from frontend.tab_round import *

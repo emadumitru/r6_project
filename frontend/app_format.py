@@ -1,6 +1,8 @@
 import streamlit as st
 
 def recommender_format(opperators):
+
+    
     # Define lists for the dropdown menus
     maps = [
         "Bank", "Border", "Chalet", "Clubhouse", "Coastline", 
@@ -52,8 +54,8 @@ def recommender_format(opperators):
     
 
     # Main page content
-    st.write(f"##### Selected Match Settings")
-    st.write(f"**{st.session_state.selected_map} - {st.session_state.selected_game_type}**")
+    # st.write(f"##### Selected Match Settings")
+    st.write(f"Playing a **{st.session_state.selected_game_type}** game on **{st.session_state.selected_map}**.")
     # st.write(f"**Game Type:** {selected_game_type}")
     # st.write(f"**Starting Side:** {selected_side}")
 

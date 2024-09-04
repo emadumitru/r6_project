@@ -71,8 +71,18 @@ def display_operator_selection(player_name, operators_dict):
     clicked = clickable_images(
         images,
         titles=operator_names,
-        div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-        img_style={"margin": "3px", "height": "75px", "cursor": "pointer"},
+        div_style={
+            "display": "flex",
+            "justify-content": "left",
+            "flex-wrap": "wrap",
+            "gap": "auto"  # Adds some space between images
+        },
+        img_style={
+            "flex": "1 0 14.28%",  # Ensures each image takes exactly 1/7th of the row
+            "max-width": "14.28%",  # Forces exactly 7 images per row
+            "height": "auto",  # Maintains aspect ratio
+            "cursor": "pointer"
+        },
         key=f"{player_name}_newround_clickable_images",
     )
 
