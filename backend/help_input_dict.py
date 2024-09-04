@@ -11,9 +11,9 @@ player_data = {
 }
 
 round_data = {
-    'site': str,                     # Example: 'Kitchen' - Site of the round
-    'side': str,                     # Example: 'attack' - Side (e.g., 'attack' or 'defense')
     'win': bool,                     # Example: True - True if the round was won
+    'site': str,                     # Example: 'Kitchen' - Site of the round
+    'side': str,                     # Example: 'attack' - Side played
     'rtype': str,                    # Example: 'normal' - Type of the round
     'endcondition': str,             # Example: 'time expired' - End condition of the round
     'date': datetime.date,           # Example: datetime.date(2021, 1, 1) - Date of the round

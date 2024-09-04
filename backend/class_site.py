@@ -6,7 +6,8 @@ class Site:
         self.map_name = map_name
         self.side = side
         self.name = site_name
-        self.rounds = {}
+        self.rounds = {}                                  # {round_id: Round}
+        self.games_in_site = []                           # [game_id]
         self.statistics = self.initialize_statistics()
 
     def __str__(self):
@@ -14,6 +15,8 @@ class Site:
 
     def add_round(self, round):
         self.rounds[round.id] = round
+        if round.game_id not in self.games_in_site:
+            self.games_in_site.append(round.game_id)
         self.update_statistics(round.win)
 
     def initialize_statistics(self):

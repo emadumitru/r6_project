@@ -76,7 +76,7 @@ def create_game_and_rounds(input_dict):
     score_op = input_dict['score_op']
 
     # Initialize rounds dictionary
-    rounds = {}
+    rounds = []
     round_wins = [input_dict[f'round_{i}_win'] for i in range(1, nrounds + 1)]
 
     # Create rounds based on available rounds in input_dict
@@ -117,7 +117,7 @@ def create_game_and_rounds(input_dict):
 
         # Create Round object and add to rounds dictionary
         round_obj = Round(round_id, game_id, round_number, round_data)
-        rounds[round_id] = round_obj
+        rounds.append(round_obj)
         round_id += 1
 
     # Create the game_data dictionary to pass to the Game constructor
@@ -136,9 +136,9 @@ def create_game_and_rounds(input_dict):
     }
 
     # Create Game object
-    game_obj = Game(game_id, rounds, game_data)
+    game_obj = Game(game_id, game_data)
 
-    return game_obj
+    return game_obj, rounds
 
 def form_input_clean(input_dict):
     """
@@ -375,9 +375,9 @@ def clean_format(input_dict):
     def to_sides(value):
         """Convert to string or return None if conversion fails."""
         if value in ['1', 1]:
-            return 'attack'
+            return 'Attack'
         elif value in ['2', 2]:
-            return 'defense'
+            return 'Defense'
         else:
             return None
 
@@ -436,7 +436,7 @@ def old_input_clean_data(rec):
 
     # change map names
     # map names exist in Map, Game, Site
-    # change in rec.maps, rec.maps.sites, rec.games
+    # change in rec.maps, rec.maps.sites, rec.maps.games
     list_old_names = ['Club House', 'Kafe', 'Emerald', 'Nighthaven']
     list_new_names = ['Clubhouse', 'Kafe Dostoyevsky', 'Emerald Plains', 'Nighthaven Labs']
 
@@ -446,14 +446,67 @@ def old_input_clean_data(rec):
         except KeyError:
             pass
         rec.maps[new_name].name = new_name
-        for site in rec.maps[new_name].sites.values():
+        for site in rec.maps[new_name].sites["Attack"].values():
             site.map_name = new_name
-        for game in rec.games.values():
+        for site in rec.maps[new_name].sites["Defense"].values():
+            site.map_name = new_name
+        for game in rec.maps[new_name].games.values():
             if game.map_name == old_name:
                 game.map_name = new_name
+    list_sites_per_map = {}
+    # list_sites_per_map = {
+    #     'Clubhouse': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Kafe Dostoyevsky': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Emerald Plains': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Nighthaven Labs': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Bank': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Border': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Chalet': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Coastline': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Consulate': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Favela': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Hereford Base': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'House': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Kanal': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Oregon': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Outback': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Plane': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Skyscraper': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Theme Park': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Tower': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Villa': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Yacht': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Lair': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+    #     'Stadium': {'1': '', '2': ' ', '3': '  ', '4': '   '}
+    # }
 
-    list_sites_per_map = {
-        'Clubhouse': {1: 'Church and Arsenal', 2: 'Cash and CCTV', 3: 'Bar and Gaming', 4: 'Master and Gym'},
-    }
+    # change site names
+    # site names exist in Site, Round and in dictionary key in Map.site
+    # change in rec.maps.sites.names, rec.maps.sites second key, rec.maps.rounds.site, rec.maps.sites.rounds.site
+
+    for map_name, sites_dictionary in list_sites_per_map.items():
+        if map_name in rec.maps.keys():
+            for old, new in sites_dictionary.items():
+                if old in rec.maps[map_name].sites["Attack"]:
+                    rec.maps[map_name].sites["Attack"][new] = rec.maps[map_name].sites["Attack"].pop(old)
+                    rec.maps[map_name].sites["Attack"][new].name = new
+                    for round in rec.maps[map_name].sites["Attack"][new].rounds.values():
+                        if round.site == old:
+                            round.site = new
+                else:
+                    print(f"Attack {old} not found in {map_name}")
+                if old in rec.maps[map_name].sites["Defense"]:
+                    rec.maps[map_name].sites["Defense"][new] = rec.maps[map_name].sites["Defense"].pop(old)
+                    rec.maps[map_name].sites["Defense"][new].name = new
+                    for round in rec.maps[map_name].sites["Defense"][new].rounds.values():
+                        if round.site == old:
+                            round.site = new
+                else:
+                    print(f"Defense {old} not found in {map_name}")
+
+                # change round site names in rec.maps[map_name].rounds
+                for round in rec.maps[map_name].rounds.values():
+                    if round.site == old:
+                        round.site = new
 
     return rec
