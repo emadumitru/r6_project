@@ -50,6 +50,7 @@ def determine_round_type(gtype, round_number, roundwins):
             return 'matchpoint-op'
         else:
             return 'normal'
+    return None
 
 def create_game_and_rounds(input_dict):
     """
@@ -228,6 +229,8 @@ def form_input_clean(input_dict):
     return cleaned_dict
 
 
+
+
 def load_instances_from_csv(path):
     pass
 
@@ -280,6 +283,12 @@ def read_old_csv_line(line):
         'score_op': line_dict.get('score_opp'),
     }
 
+    # check if all bas exist (not "") or all bans do not exist ("")
+    if input_dict['ban_a_op'] == "" and input_dict['ban_d_op'] == "" and input_dict['ban_a_us'] == "" and input_dict['ban_d_us'] == "":
+        input_dict['gtype'] = "Standard"
+    elif input_dict['ban_a_op'] != "" and input_dict['ban_d_op'] != "" and input_dict['ban_a_us'] != "" and input_dict['ban_d_us'] != "":
+        input_dict['gtype'] = "Ranked"
+    
     # Iterate over rounds to extract round-specific data
     for i in range(1, 10):
         input_dict[f'round_{i}_id'] = i
@@ -354,7 +363,12 @@ def clean_format(input_dict):
     def to_date(value):
         """Convert to datetime.date or return None if conversion fails."""
         try:
-            return datetime.date(value, '%m/%d/%Y') if value else None
+            if type(value) == datetime.date:
+                return value
+            elif type(value) == str:
+                return datetime.datetime.strptime(value, '%m/%d/%Y').date()
+            else:
+                return None
         except (TypeError, ValueError):
             return None
         
@@ -384,14 +398,15 @@ def clean_format(input_dict):
     }
 
     # Clean round-specific and player-specific data
-    for i in range(1, 10):
+    for i in range(1, cleaned_dict['nrounds']+1):
         # Round-specific keys
         cleaned_dict[f'round_{i}_id'] = to_int(input_dict.get(f'round_{i}_id'))
         cleaned_dict[f'round_{i}_number'] = to_int(input_dict.get(f'round_{i}_number'))
         cleaned_dict[f'round_{i}_site'] = to_str(input_dict.get(f'round_{i}_site'))
         cleaned_dict[f'round_{i}_side'] = to_sides(input_dict.get(f'round_{i}_side'))
         cleaned_dict[f'round_{i}_win'] = to_bool(input_dict.get(f'round_{i}_win'))
-        cleaned_dict[f'round_{i}_type'] = to_str(input_dict.get(f'round_{i}_type'))
+        round_wins_so_far = [cleaned_dict[f'round_{j}_win'] for j in range(1, i)]
+        cleaned_dict[f'round_{i}_type'] = determine_round_type(cleaned_dict['gtype'], i, round_wins_so_far)
         cleaned_dict[f'round_{i}_endcondition'] = to_str(input_dict.get(f'round_{i}_endcondition'))
         cleaned_dict[f'round_{i}_date'] = to_str(input_dict.get(f'round_{i}_date'))
 
@@ -412,6 +427,7 @@ def clean_format(input_dict):
         cleaned_dict[f'mihnea_round_{i}_entryfrag'] = to_bool(input_dict.get(f'mihnea_round_{i}_entryfrag'))
         cleaned_dict[f'mihnea_round_{i}_diffuser'] = to_bool(input_dict.get(f'mihnea_round_{i}_diffuser'))
         cleaned_dict[f'mihnea_round_{i}_cluth'] = to_bool(input_dict.get(f'mihnea_round_{i}_cluth'))
+
 
     return cleaned_dict
 
@@ -435,5 +451,9 @@ def old_input_clean_data(rec):
         for game in rec.games.values():
             if game.map_name == old_name:
                 game.map_name = new_name
+
+    list_sites_per_map = {
+        'Clubhouse': {1: 'Church and Arsenal', 2: 'Cash and CCTV', 3: 'Bar and Gaming', 4: 'Master and Gym'},
+    }
 
     return rec

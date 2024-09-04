@@ -1,9 +1,11 @@
 from backend.class_recommender import Recommender
+from backend.support_functions import *
 
-rec = Recommender()
-rec.load_old_data()
-rec.save()
-print(len(rec.games))
+
+# rec = Recommender()
+# rec.load_old_data()
+# rec.save()
+# print(len(rec.games))
 
 # sides = []
 # for game in rec.games.values():
@@ -12,6 +14,25 @@ print(len(rec.games))
 #             sides.append(round.side)
 
 # print(sides)
+
+# rec = Recommender()
+# rec.load_old_data()
+# rec = old_input_clean_data(rec)
+# rec.save()
+# rec.save_to_csv()
+
+rec = Recommender().load()
+
+
+check_values = []
+
+for game in rec.games.values():
+    for round in game.rounds.values():
+        check_values.append(round.site)
+
+print(set(check_values))
+for item in set(check_values):
+    print(item, type(item))
 
 
 
