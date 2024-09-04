@@ -228,6 +228,8 @@ def form_input_clean(input_dict):
     return cleaned_dict
 
 
+def load_instances_from_csv(path):
+    pass
 
 
 ## Functions for OLD CSV data processing
