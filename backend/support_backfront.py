@@ -14,7 +14,7 @@ def update_rec(rec, game):
 def get_site_for_map(rec, map_name):
     if map_name not in rec.maps:
         return []
-    sites = rec.maps[map_name].sites.values()
+    sites = rec.maps[map_name].sites["Attack"].values()
     sites = [site.name for site in sites]
     return list(set(sites))
 
