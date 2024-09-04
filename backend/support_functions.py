@@ -19,7 +19,7 @@ def determine_round_type(gtype, round_number, roundwins):
     :param roundwins: A list of booleans representing the round wins.
     :return: A string representing the round type.
     """
-    if gtype == 'ranked':
+    if gtype == 'Ranked':
         if round_number in [7, 9]:
             return 'overtime'
         elif roundwins.count(True) == 4:
@@ -32,7 +32,7 @@ def determine_round_type(gtype, round_number, roundwins):
             return 'matchpoint-op'
         else:
             return 'normal'
-    if gtype == 'standard':
+    if gtype == 'Standard':
         if round_number == 7:
             return 'overtime'
         elif roundwins.count(True) == 3:
@@ -41,7 +41,7 @@ def determine_round_type(gtype, round_number, roundwins):
             return 'matchpoint-op'
         else:
             return 'normal'
-    if gtype == 'quick':
+    if gtype == 'Quick':
         if round_number == 5:
             return 'overtime'
         elif roundwins.count(True) == 2:
@@ -458,7 +458,7 @@ def old_input_clean_data(rec):
     list_sites_per_map = {
         'Clubhouse': {'1': 'Gym', '2': 'Cash', '3': 'Bar', '4': 'Basement'},
         'Kafe Dostoyevsky': {'1': 'Cocktail', '2': 'Mining', '3': 'Reading', '4': 'Kitchen'},
-        'Emerald Plains': {'1': 'CEO', '2': 'Painting', '3': 'Bat', '4': 'Kitchen'},
+        'Emerald Plains': {'1': 'CEO', '2': 'Painting', '3': 'Bar', '4': 'Kitchen'},
         # 'Nighthaven Labs': {'1': '', '2': '', '3': '', '4': ''},
         # 'Bank': {'1': 'CEO', '2': 'Open Area', '3': '', '4': ''},
         # 'Border': {'1': '', '2': ' ', '3': '  ', '4': '   '},
