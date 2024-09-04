@@ -203,7 +203,7 @@ def form_input_clean(input_dict):
         # Round-specific keys
         cleaned_dict[f'round_{i}_number'] = i
         cleaned_dict[f'round_{i}_site'] = to_str(input_dict.get(f'round_{i}_site'))
-        cleaned_dict[f'round_{i}_side'] = to_str(input_dict.get(f'round_{i}_side')).lower()
+        cleaned_dict[f'round_{i}_side'] = to_str(input_dict.get(f'round_{i}_side'))
         cleaned_dict[f'round_{i}_win'] = to_bool(input_dict.get(f'round_{i}_win'))
         cleaned_dict[f'round_{i}_endcondition'] = to_str(input_dict.get(f'round_{i}_endcondition'))
         cleaned_dict[f'round_{i}_date'] = cleaned_dict['date']

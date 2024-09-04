@@ -21,13 +21,13 @@ col1, col2 = st.sidebar.columns(2)
 with col1:
     if submit_game:
         bans = st.session_state["bans"]
-        game = pass_on_rounds_game(st.session_state["rounds"], st.session_state.selected_map, bans[0], bans[1], bans[2], bans[3], st.session_state.selected_game_type)
-        print(game.__dict__)
-        print("Player stats\n")
-        for stat_list in game.player_stats.values():
-            for stat in stat_list:
-                print(stat.__dict__)
-        rec = update_rec(rec, game)
+        game, rounds_round = pass_on_rounds_game(st.session_state["rounds"], st.session_state.selected_map, bans[0], bans[1], bans[2], bans[3], st.session_state.selected_game_type)
+        # print(game.__dict__)
+        # print("Player stats\n")
+        # for stat_list in game.player_stats.values():
+        #     for stat in stat_list:
+        #         print(stat.__dict__)
+        rec = update_rec(rec, game, rounds_round)
         st.session_state["rounds"] = []
 
 with col2:

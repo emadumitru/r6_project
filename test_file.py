@@ -22,6 +22,11 @@ rec.save()
 rec.save_to_csv()
 
 # rec = Recommender().load()
+# len_games = []
+# for map in rec.maps.values():
+#     len_games.append(len(map.games))
+
+# print(sum(len_games))
 
 
 # check_values = []
