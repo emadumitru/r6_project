@@ -23,7 +23,7 @@ Round_attributes = {
     'site': str,                     # Site of the round, e.g., 'Kitchen'
     'side': str,                     # Side played, e.g., 'attack' or 'defense'
     'win': bool,                     # Whether the round was won, e.g., True
-    'player_stats': dict[PS],            # Player stats for the round, e.g., {'ema': PS, 'mihnea': PS}
+    'player_stats': dict[PS],        # Player stats for the round, e.g., {'ema': PS, 'mihnea': PS}
     'rtype': str,                    # Round type, e.g., 'bomb'
     'endcondition': str,             # End condition of the round, e.g., 'time expired'
     'date': datetime.date            # Date of the round, e.g., datetime.date(2024, 9, 1)
@@ -34,15 +34,15 @@ Site_attributes = {
     'map_name': str,         # Name of the map, e.g., 'Clubhouse'
     'side': str,             # Side played on the site, e.g., 'attack'
     'name': str,             # Name of the site, e.g., 'Kitchen'
-    'rounds': dict[Round],          # Dictionary of rounds played at the site, e.g., {1: Round}
+    'rounds': dict[Round],   # Dictionary of rounds played at the site, e.g., {1: Round}
     'statistics': dict       # Win statistics, e.g., {'win': 2, 'winperc': 50.0}
 }
 
 Rmap_attributes = {
     'name': str,             # Name of the map, e.g., 'Oregon'
-    'sites': dict[Site],           # Sites available on the map, e.g., {'Kitchen_attack': Site}
-    'rounds': dict[Round],          # Rounds played on the map, e.g., {1: Round}
-    'games': dict[Game],           # Games played on the map, e.g., {101: Game}
+    'sites': dict[Site],     # Sites available on the map, e.g., {'Kitchen_attack': Site}
+    'rounds': dict[Round],   # Rounds played on the map, e.g., {1: Round}
+    'games': dict[Game],     # Games played on the map, e.g., {101: Game}
     'statistics': dict       # Win statistics, e.g., {'win': 5, 'winperc': 60.0}
 }
 
@@ -56,13 +56,13 @@ Game_attributes = {
     'gtype': str,            # Game type, e.g., 'ranked'
     'nrounds': int,          # Number of rounds, e.g., 7
     'score': tuple,          # Game score, e.g., (4, 3)
-    'rounds': dict[Round],          # Rounds in the game, e.g., {1: Round}
+    'rounds': dict[Round],   # Rounds in the game, e.g., {1: Round}
     'player_stats': dict,    # Player stats, e.g., {'ema': [PS]}
     'game_stats': dict       # Game stats summary, e.g., {'kills': 15}
 }
 
 Recommender_attributes = {
     'games': dict[Game],           # All games tracked, e.g., {101: Game}
-    'rounds': dict[Round],          # All rounds tracked, e.g., {1: Round}
+    'rounds': dict[Round],         # All rounds tracked, e.g., {1: Round}
     'maps': dict[Rmap]             # Maps available, e.g., {'Oregon': Rmap}
 }

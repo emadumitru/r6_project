@@ -61,70 +61,45 @@ class Game:
         return game_stats
 
     def csv_line(self):
-        # get first element of rounds
-        round_1 = list(self.rounds.values())[0] if len(self.rounds) > 0 else None
-        round_2 = list(self.rounds.values())[1] if len(self.rounds) > 1 else None
-        round_3 = list(self.rounds.values())[2] if len(self.rounds) > 2 else None
-        round_4 = list(self.rounds.values())[3] if len(self.rounds) > 3 else None
-        round_5 = list(self.rounds.values())[4] if len(self.rounds) > 4 else None
-        round_6 = list(self.rounds.values())[5] if len(self.rounds) > 5 else None
-        round_7 = list(self.rounds.values())[6] if len(self.rounds) > 6 else None
-        round_8 = list(self.rounds.values())[7] if len(self.rounds) > 7 else None
-        round_9 = list(self.rounds.values())[8] if len(self.rounds) > 8 else None
         dictionary = {
-            'win': self.win,
+            'date': self.date,
+            'map_name': self.map_name,
+            'game_win': self.win,
+            'ban_a_us': self.bans_a[0],
+            'ban_a_op': self.bans_a[1],
+            'ban_d_us': self.bans_d[0],
+            'ban_d_op': self.bans_d[1],
+            'gtype': self.gtype,
+            'nrounds': self.nrounds,
             'score_us': self.score[0],
-            'score_opp': self.score[1],
-            'rounds': self.nrounds,
-            'map': self.map_name,
-            'bans_a_us': self.bans_a[0],
-            'bans_a_opp': self.bans_a[1],
-            'bans_d_us': self.bans_d[0],
-            'bans_d_opp': self.bans_d[1],
-            'location_1': round_1.site if round_1 else None,
-            'location_2': round_2.site if round_2 else None,
-            'location_3': round_3.site if round_3 else None,
-            'location_4': round_4.site if round_4 else None,
-            'location_5': round_5.site if round_5 else None,
-            'location_6': round_6.site if round_6 else None,
-            'location_7': round_7.site if round_7 else None,
-            'location_8': round_8.site if round_8 else None,
-            'location_9': round_9.site if round_9 else None,
-            'side_1': round_1.side if round_1 else None,
-            'side_2': round_2.side if round_2 else None,
-            'side_3': round_3.side if round_3 else None,
-            'side_4': round_4.side if round_4 else None,
-            'side_5': round_5.side if round_5 else None,
-            'side_6': round_6.side if round_6 else None,
-            'side_7': round_7.side if round_7 else None,
-            'side_8': round_8.side if round_8 else None,
-            'side_9': round_9.side if round_9 else None,
-            'opperator_1': round_1.player_stats['ema'].opperator if round_1 else None,
-            'opperator_2': round_2.player_stats['ema'].opperator if round_2 else None,
-            'opperator_3': round_3.player_stats['ema'].opperator if round_3 else None,
-            'opperator_4': round_4.player_stats['ema'].opperator if round_4 else None,
-            'opperator_5': round_5.player_stats['ema'].opperator if round_5 else None,
-            'opperator_6': round_6.player_stats['ema'].opperator if round_6 else None,
-            'opperator_7': round_7.player_stats['ema'].opperator if round_7 else None,
-            'opperator_8': round_8.player_stats['ema'].opperator if round_8 else None,
-            'opperator_9': round_9.player_stats['ema'].opperator if round_9 else None,
-            'win_1': round_1.win if round_1 else None,
-            'win_2': round_2.win if round_2 else None,
-            'win_3': round_3.win if round_3 else None,
-            'win_4': round_4.win if round_4 else None,
-            'win_5': round_5.win if round_5 else None,
-            'win_6': round_6.win if round_6 else None,
-            'win_7': round_7.win if round_7 else None,
-            'win_8': round_8.win if round_8 else None,
-            'win_9': round_9.win if round_9 else None,
-            'kill_1': round_1.player_stats['ema'].kills if round_1 else None,
-            'kill_2': round_2.player_stats['ema'].kills if round_2 else None,
-            'kill_3': round_3.player_stats['ema'].kills if round_3 else None,
-            'kill_4': round_4.player_stats['ema'].kills if round_4 else None,
-            'kill_5': round_5.player_stats['ema'].kills if round_5 else None,
-            'kill_6': round_6.player_stats['ema'].kills if round_6 else None,
-            'kill_7': round_7.player_stats['ema'].kills if round_7 else None,
-            'kill_8': round_8.player_stats['ema'].kills if round_8 else None,
-            'kill_9': round_9.player_stats['ema'].kills if round_9 else None,
-            'death_1': round_1.player_stats['ema'].deaths if round_1 else None,
+            'score_op': self.score[1],
         }
+
+
+        for round in self.rounds.values():
+            i = round.round_number
+            round_dict = {
+                f'round_{i}_site': round.site,
+                f'round_{i}_side': round.side,
+                f'round_{i}_win': round.win,
+                f'round_{i}_rtype': round.rtype,
+                f'round_{i}_endcondition': round.endcondition,
+                f'round_{i}_date': round.date,
+                f'ema_round_{i}_opperator': round.player_stats['ema'].opperator,
+                f'ema_round_{i}_kills': round.player_stats['ema'].kills,
+                f'ema_round_{i}_assists': round.player_stats['ema'].assists,
+                f'ema_round_{i}_survived': round.player_stats['ema'].survived,
+                f'ema_round_{i}_entryfrag': round.player_stats['ema'].entryfrag,
+                f'ema_round_{i}_diffuser': round.player_stats['ema'].diffuser,
+                f'ema_round_{i}_cluth': round.player_stats['ema'].cluth,
+                f'mihnea_round_{i}_opperator': round.player_stats['mihnea'].opperator,
+                f'mihnea_round_{i}_kills': round.player_stats['mihnea'].kills,
+                f'mihnea_round_{i}_assists': round.player_stats['mihnea'].assists,
+                f'mihnea_round_{i}_survived': round.player_stats['mihnea'].survived,
+                f'mihnea_round_{i}_entryfrag': round.player_stats['mihnea'].entryfrag,
+                f'mihnea_round_{i}_diffuser': round.player_stats['mihnea'].diffuser,
+                f'mihnea_round_{i}_cluth': round.player_stats['mihnea'].cluth
+            }
+            dictionary.update(round_dict)
+
+        return dictionary

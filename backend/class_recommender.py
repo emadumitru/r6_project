@@ -48,9 +48,16 @@ class Recommender:
 
         temp_df = pd.DataFrame()
         for game in self.games.values():
-            temp_df = pd.concat([temp_df, pd.DataFrame([game.csv_line])], ignore_index=True)
-        with open(path, 'w', encoding='utf-8') as file:
+            temp_df = pd.concat([temp_df, pd.DataFrame([game.csv_line()])], ignore_index=True)
+
+        # Open the file with newline='' to prevent extra empty lines in the CSV
+        with open(path, 'w', encoding='utf-8', newline='') as file:
             temp_df.to_csv(file, index=False)
+
+    def load_from_csv(self, csv_name='csv_games.csv', directory='data'):
+        path = get_relative_path(csv_name, directory, __file__)
+
+        self.games, self.rounds, self.maps = load_instances_from_csv(path)
 
     def save(self, filename='recommender.pkl', directory='data'):
         path = get_relative_path(filename, directory, __file__)
@@ -68,19 +75,6 @@ class Recommender:
 
 
 if __name__ == '__main__':
-    # rec = Recommender()
-    # rec.load_old_data()
-    # print(len(rec.games))
 
-    # print(len(rec.rounds))
-    # print(rec.maps.keys())
-
-    # rec = old_input_clean_data(rec)
-    # rec = old_input_clean_data(rec)
-
-    # print(rec.maps.keys())
-    # print(rec.maps.values())
-
-    # rec.save()
     pass
 
