@@ -17,9 +17,6 @@ from backend.support_functions import *
 
 rec = Recommender()
 rec.load_old_data()
-
-# for map 
-
 rec = old_input_clean_data(rec)
 rec.save()
 rec.save_to_csv()

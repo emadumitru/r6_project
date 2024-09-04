@@ -453,32 +453,33 @@ def old_input_clean_data(rec):
         for game in rec.maps[new_name].games.values():
             if game.map_name == old_name:
                 game.map_name = new_name
+
     list_sites_per_map = {}
-    # list_sites_per_map = {
-    #     'Clubhouse': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Kafe Dostoyevsky': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Emerald Plains': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Nighthaven Labs': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Bank': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Border': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Chalet': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Coastline': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Consulate': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Favela': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Hereford Base': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'House': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Kanal': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Oregon': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Outback': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Plane': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Skyscraper': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Theme Park': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Tower': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Villa': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Yacht': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Lair': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-    #     'Stadium': {'1': '', '2': ' ', '3': '  ', '4': '   '}
-    # }
+    list_sites_per_map = {
+        'Clubhouse': {'1': 'Gym', '2': 'Cash', '3': 'Bar', '4': 'Basement'},
+        'Kafe Dostoyevsky': {'1': 'Cocktail', '2': 'Mining', '3': 'Reading', '4': 'Kitchen'},
+        'Emerald Plains': {'1': 'CEO', '2': 'Painting', '3': 'Bat', '4': 'Kitchen'},
+        # 'Nighthaven Labs': {'1': '', '2': '', '3': '', '4': ''},
+        # 'Bank': {'1': 'CEO', '2': 'Open Area', '3': '', '4': ''},
+        # 'Border': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Chalet': {'1': 'Bedroom', '2': ' ', '3': '  ', '4': 'Garage'},
+        'Coastline': {'1': 'Hooka', '2': 'Theater', '3': 'Bar', '4': 'Kitchen'},
+        # 'Consulate': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Favela': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Hereford Base': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'House': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Kanal': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Oregon': {'1': 'Dorms', '2': '', '3': 'Open Area', '4': 'Basement'},
+        'Outback': {'1': 'Laundry', '2': 'Party', '3': 'Green/Red', '4': 'Kitchen'},
+        # 'Plane': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        'Skyscraper': {'1': 'Tea Room', '2': 'Exhibition', '3': 'Bedroom', '4': 'BBQ'},
+        'Theme Park': {'1': 'Initiation', '2': 'Daycare', '3': 'Throne', '4': 'Lab'},
+        # 'Tower': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Villa': {'1': 'Aviator', '2': 'Statuary', '3': '', '4': ''},
+        # 'Yacht': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Lair': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Stadium': {'1': '', '2': ' ', '3': '  ', '4': '   '}
+    }
 
     # change site names
     # site names exist in Site, Round and in dictionary key in Map.site
