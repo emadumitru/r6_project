@@ -2,6 +2,8 @@ import streamlit as st
 import json
 import os
 from st_clickable_images import clickable_images
+from copy import deepcopy  # Import deepcopy
+
 
 # Paths to the JSON files containing attacker and defender data
 attackers_json_path = 'data/attackers.json'
@@ -117,7 +119,7 @@ def display_operator_selection(player_name, operators_dict):
     )
 
     st.session_state["current_round"]["players"][player_name]["entryfrag"] = st.checkbox(
-        f"Did {player_name} get/was the first kill?", value=st.session_state["current_round"]["players"][player_name]["entryfrag"],
+        f"Did {player_name} get the first kill?", value=st.session_state["current_round"]["players"][player_name]["entryfrag"],
         key=f"{player_name}_newround_entryfrag_checkbox"
     )
 
@@ -132,43 +134,39 @@ def display_operator_selection(player_name, operators_dict):
     )
 
 def print_round_overview():
-    # Display summary of the submitted round
-        st.write("### Round Summary")
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.write(f"{st.session_state['current_round']['site']}")
-        with col2:
-            st.write(f"{st.session_state['current_round']['side']}")
-        with col3:
-            st.write(f"{'Win' if st.session_state['current_round']['win'] else 'Loss'}")
-        with col4:
-            st.write(f"{st.session_state['current_round']['endcondition']}")
+    round = st.session_state['current_round']
+    st.write(f'**Round {len(st.session_state.rounds)+1}**: {round["site"]} - {round["side"]} - {"Win" if round["win"] else "Loss"}')
+    ema = round["players"]["Ema"]
+    mihnea = round["players"]["Mihnea"]
 
+    # Using icons for True/False values
+    def icon(value):
+        return "✅" if value else "❌"
 
-        # Display players' performance summaries
-        col1, col2 = st.columns(2)
-        with col1:
-            player = "Ema"
-            st.write(f"#### {player}'s Performance")
-            player_data = st.session_state["current_round"]["players"][player]
-            st.write(f"Operator: {player_data['operator']}")
-            st.write(f"Kills: {player_data['kills']}")
-            st.write(f"Assists: {player_data['assists']}")
-            st.write(f"Survived: {'✅' if player_data['survived'] else '❌'}")
-            st.write(f"Entry Frag: {'✅' if player_data['entryfrag'] else '❌'}")
-            st.write(f"Diffuser: {'✅' if player_data['diffuser'] else '❌'}")
-            st.write(f"Clutch: {'✅' if player_data['clutch'] else '❌'}")
-        with col2:
-            player = "Mihnea"
-            st.write(f"#### {player}'s Performance")
-            player_data = st.session_state["current_round"]["players"][player]
-            st.write(f"Operator: {player_data['operator']}")
-            st.write(f"Kills: {player_data['kills']}")
-            st.write(f"Assists: {player_data['assists']}")
-            st.write(f"Survived: {'✅' if player_data['survived'] else '❌'}")
-            st.write(f"Entry Frag: {'✅' if player_data['entryfrag'] else '❌'}")
-            st.write(f"Diffuser: {'✅' if player_data['diffuser'] else '❌'}")
-            st.write(f"Clutch: {'✅' if player_data['clutch'] else '❌'}")
+    # Display player data in a nicely formatted table
+    st.markdown(
+        """
+        | **Player** | **Operator** | **Kills** | **Assists** | **Survived** | **EntryFrag** | **Diffuser** | **Clutch** |
+        |------------|-------------------|-----------|-------------|---------------|----------------|--------------|------------|
+        | **Ema**    | {ema_operator} | {ema_kills} | {ema_assists} | {ema_surv} | {ema_ef} | {ema_dif} | {ema_cl} |
+        | **Mihnea** | {mihnea_operator} | {mihnea_kills} | {mihnea_assists} | {mihnea_surv} | {mihnea_ef} | {mihnea_dif} | {mihnea_cl} |
+        """.format(
+            ema_operator=ema["operator"],
+            ema_kills=ema["kills"],
+            ema_assists=ema["assists"],
+            ema_surv=icon(ema["survived"]),
+            ema_ef=icon(ema["entryfrag"]),
+            ema_dif=icon(ema["diffuser"]),
+            ema_cl=icon(ema["clutch"]),
+            mihnea_operator=mihnea["operator"],
+            mihnea_kills=mihnea["kills"],
+            mihnea_assists=mihnea["assists"],
+            mihnea_surv=icon(mihnea["survived"]),
+            mihnea_ef=icon(mihnea["entryfrag"]),
+            mihnea_dif=icon(mihnea["diffuser"]),
+            mihnea_cl=icon(mihnea["clutch"]),
+        )
+    )
 
 # Function to add a new round form
 def add_new_round():
@@ -192,7 +190,7 @@ def add_new_round():
         st.session_state["current_round"]["site"] = st.radio(
         "Site", site_options, key="site_full", horizontal=True)
     else:
-        col1, col2 = st.columns([len(site_options)/2, 1])
+        col1, col2 = st.columns([1, 1])
         with col1:
             st.session_state["current_round"]["site"] = st.radio(
             "Site", site_options + ['Other'], key="site_nonfull", horizontal=True)
@@ -209,12 +207,32 @@ def add_new_round():
     # Use the appropriate operator dictionary based on the selected side
     operator_dict = attackers if st.session_state["current_round"]["side"] == "Attack" else defenders
 
-    # Display operator selection and performance input for each player
+    # Create containers for each player to manage their layout and updates
     col1, col2 = st.columns(2)
     with col1:
-        display_operator_selection("Ema", operator_dict)
+        ema_container = st.container()
     with col2:
+        mihnea_container = st.container()
+
+    # Use the containers to render each player's operator selection and performance input
+    with ema_container:
+        side=st.session_state["current_round"]["side"]
+        st.write(f"Displaying Ema's Selection for **{side}**")  # Debug statement
+        display_operator_selection("Ema", operator_dict)
+
+    with mihnea_container:
+        st.write(f"Displaying Mihnea's Selection for **{side}**")  # Debug statement
         display_operator_selection("Mihnea", operator_dict)
+
+    # # Display operator selection and performance input for each player
+    # col1, col2 = st.columns(2)
+    # with col1:
+    #     side=st.session_state["current_round"]["side"]
+    #     st.write(f"Displaying Ema's Selection for {side}")  # Debug statement
+    #     display_operator_selection("Ema", operator_dict)
+    # with col2:
+    #     st.write("Displaying Mihnea's Selection")  # Debug statement
+    #     display_operator_selection("Mihnea", operator_dict)
 
     st.divider()
 
@@ -222,7 +240,8 @@ def add_new_round():
 
     # Add button to submit the current round data
     if st.button("Submit Round Data", key=f"submit_newround_{len(st.session_state['rounds'])}"):
-        st.session_state["rounds"].append(st.session_state["current_round"])
+        # Append a deep copy of the current round to the list of rounds
+        st.session_state["rounds"].append(deepcopy(st.session_state["current_round"]))        
         st.success("Round data submitted successfully!")
 
         # Reset the current round data for new input

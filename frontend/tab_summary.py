@@ -2,6 +2,8 @@ import streamlit as st
 
 def print_summary_match():
     st.write('### Summary match')
+    
+    # st.write(st.session_state['rounds']) # Debug purpose
 
     len_rounds = len(st.session_state['rounds'])
     score_us = len([round for round in st.session_state['rounds'] if round['win']])

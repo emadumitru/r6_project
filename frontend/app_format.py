@@ -32,6 +32,7 @@ def recommender_format(opperators):
     get_random_opperators = st.sidebar.checkbox("Get Random Opperators", key="get_random_opperators")
     get_recommendations = st.sidebar.checkbox("Get Recommendations", key="get_recommendations")
     submit_game = st.sidebar.button("Submit Match", key="submit_game")
+    reset_game = st.sidebar.button("Reset Match", key="reset_game")
 
     if st.session_state.selected_game_type == "Ranked":
         st.sidebar.header("Bans")
@@ -59,4 +60,4 @@ def recommender_format(opperators):
     # st.write(f"**Game Type:** {selected_game_type}")
     # st.write(f"**Starting Side:** {selected_side}")
 
-    return selected_side, get_random_opperators, get_recommendations, submit_game
+    return selected_side, get_random_opperators, get_recommendations, submit_game, reset_game

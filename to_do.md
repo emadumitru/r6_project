@@ -1,9 +1,11 @@
 # TODO List
-- [] Check why round summary keeps only last round
+- [x] Check why round summary keeps only last round
 - [x] check opperators doubling images
 - [] make summary tab
 - [] make edit tab
 - [] some maps don't work becuase of sites
+- [] reset game button
+- [x] match summary formats in round and summary tab
 
 
 # Less urgent tasks
