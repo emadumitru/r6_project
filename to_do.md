@@ -15,6 +15,7 @@
 - [x] get statistics map
 - [] get statistics site
 - [] get recommendations opperators
+- [] random tab, timeframurile mici nu folosesc toti operatorii + div by 0 (e.g., if no ash last season still have Ash as option)
 
 
 # Less urgent tasks
