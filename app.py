@@ -6,6 +6,7 @@ from frontend.app_format import *
 from frontend.tab_round import *
 import frontend.tab_summary as ts
 import frontend.tab_recommandation as tr
+import frontend.tab_statistics as tstat
 from frontend.support_frontend import *
 from backend.support_backfront import *
 
@@ -43,7 +44,7 @@ if st.sidebar.button("Save to csv"):
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["Statistics", "Round", "Summary", "Recommendation", "Edit"])
 with tab1:
-    st.write("Statistics")
+    tstat.print_map_stats(rec)
 
 with tab2:
     add_new_round()

@@ -12,7 +12,8 @@
 - [x] round end condition does not save (empty)
 - [x] load from new CSV
 - [x] get random opperators
-- [] get statistics map
+- [x] get statistics map
+- [] get statistics site
 - [] get recommendations opperators
 
 
@@ -20,3 +21,7 @@
 - [] rename all sites
 - [] make some sort of border on selected operator image
 - [] layout recom tab
+
+
+# Will be to do after ema is done
+- [] layout stat tab
