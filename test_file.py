@@ -15,13 +15,26 @@ from backend.support_functions import *
 
 # print(sides)
 
-rec = Recommender()
-rec.load_old_data()
-rec = old_input_clean_data(rec)
-rec.save()
-rec.save_to_csv()
+# rec = Recommender()
+# rec.load_old_data()
+# rec = old_input_clean_data(rec)
+# rec.save()
+# rec.save_to_csv()
 
 # rec = Recommender().load()
+# rec.save_to_csv()
+
+
+rec = Recommender()
+rec.load_from_csv()
+rec.save_to_csv()
+
+
+# rec = Recommender().load()
+
+
+
+
 # len_games = []
 # for map in rec.maps.values():
 #     len_games.append(len(map.games))

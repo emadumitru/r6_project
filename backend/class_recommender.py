@@ -67,7 +67,9 @@ class Recommender:
     def load_from_csv(self, csv_name='csv_games.csv', directory='data'):
         path = get_relative_path(csv_name, directory, __file__)
 
-        self.games, self.rounds, self.maps = load_instances_from_csv(path)
+        list_games_and_rounds = load_instances_from_csv(path)
+        for game, rounds in list_games_and_rounds:
+            self.add_game(game, rounds)
 
     def save(self, filename='recommender.pkl', directory='data'):
         path = get_relative_path(filename, directory, __file__)

@@ -177,7 +177,10 @@ def form_input_clean(input_dict):
             if type(value) == datetime.date:
                 return value
             elif type(value) == str:
-                return datetime.datetime.strptime(value, '%m/%d/%Y').date()
+                if '/' in value:
+                    return datetime.datetime.strptime(value, '%m/%d/%Y').date()
+                elif '-' in value:
+                    return datetime.datetime.strptime(value, '%Y-%m-%d').date()
             else:
                 return None
         except (TypeError, ValueError):
@@ -207,6 +210,10 @@ def form_input_clean(input_dict):
         cleaned_dict[f'round_{i}_win'] = to_bool(input_dict.get(f'round_{i}_win'))
         cleaned_dict[f'round_{i}_endcondition'] = to_str(input_dict.get(f'round_{i}_endcondition'))
         cleaned_dict[f'round_{i}_date'] = cleaned_dict['date']
+        if 'round_{i}_rtype' in input_dict:
+            cleaned_dict[f'round_{i}_rtype'] = to_str(input_dict.get(f'round_{i}_rtype'))
+        else:
+            cleaned_dict[f'round_{i}_rtype'] = ''
 
         # Player-specific keys for 'ema'
         cleaned_dict[f'ema_round_{i}_opperator'] = to_str(input_dict.get(f'ema_round_{i}_opperator'))
@@ -229,10 +236,97 @@ def form_input_clean(input_dict):
     return cleaned_dict
 
 
+def read_new_csv_line(line):
+    values = line.strip().split(',')
+
+    expected_columns = [
+        'date','map_name','game_win','ban_a_us','ban_a_op','ban_d_us','ban_d_op',
+        'gtype','nrounds','score_us','score_op',
+        'round_1_site','round_1_side','round_1_win','round_1_rtype','round_1_endcondition','round_1_date',
+        'ema_round_1_opperator','ema_round_1_kills','ema_round_1_assists','ema_round_1_survived','ema_round_1_entryfrag','ema_round_1_diffuser','ema_round_1_cluth',
+        'mihnea_round_1_opperator','mihnea_round_1_kills','mihnea_round_1_assists','mihnea_round_1_survived','mihnea_round_1_entryfrag','mihnea_round_1_diffuser','mihnea_round_1_cluth',
+        'round_2_site','round_2_side','round_2_win','round_2_rtype','round_2_endcondition','round_2_date',
+        'ema_round_2_opperator','ema_round_2_kills','ema_round_2_assists','ema_round_2_survived','ema_round_2_entryfrag','ema_round_2_diffuser','ema_round_2_cluth',
+        'mihnea_round_2_opperator','mihnea_round_2_kills','mihnea_round_2_assists','mihnea_round_2_survived','mihnea_round_2_entryfrag','mihnea_round_2_diffuser','mihnea_round_2_cluth',
+        'round_3_site','round_3_side','round_3_win','round_3_rtype','round_3_endcondition','round_3_date',
+        'ema_round_3_opperator','ema_round_3_kills','ema_round_3_assists','ema_round_3_survived','ema_round_3_entryfrag','ema_round_3_diffuser','ema_round_3_cluth',
+        'mihnea_round_3_opperator','mihnea_round_3_kills','mihnea_round_3_assists','mihnea_round_3_survived','mihnea_round_3_entryfrag','mihnea_round_3_diffuser','mihnea_round_3_cluth',
+        'round_4_site','round_4_side','round_4_win','round_4_rtype','round_4_endcondition','round_4_date',
+        'ema_round_4_opperator','ema_round_4_kills','ema_round_4_assists','ema_round_4_survived','ema_round_4_entryfrag','ema_round_4_diffuser','ema_round_4_cluth',
+        'mihnea_round_4_opperator','mihnea_round_4_kills','mihnea_round_4_assists','mihnea_round_4_survived','mihnea_round_4_entryfrag','mihnea_round_4_diffuser','mihnea_round_4_cluth',
+        'round_5_site','round_5_side','round_5_win','round_5_rtype','round_5_endcondition','round_5_date',
+        'ema_round_5_opperator','ema_round_5_kills','ema_round_5_assists','ema_round_5_survived','ema_round_5_entryfrag','ema_round_5_diffuser','ema_round_5_cluth',
+        'mihnea_round_5_opperator','mihnea_round_5_kills','mihnea_round_5_assists','mihnea_round_5_survived','mihnea_round_5_entryfrag','mihnea_round_5_diffuser','mihnea_round_5_cluth',
+        'round_6_site','round_6_side','round_6_win','round_6_rtype','round_6_endcondition','round_6_date',
+        'ema_round_6_opperator','ema_round_6_kills','ema_round_6_assists','ema_round_6_survived','ema_round_6_entryfrag','ema_round_6_diffuser','ema_round_6_cluth',
+        'mihnea_round_6_opperator','mihnea_round_6_kills','mihnea_round_6_assists','mihnea_round_6_survived','mihnea_round_6_entryfrag','mihnea_round_6_diffuser','mihnea_round_6_cluth',
+        'round_7_site','round_7_side','round_7_win','round_7_rtype','round_7_endcondition','round_7_date',
+        'ema_round_7_opperator','ema_round_7_kills','ema_round_7_assists','ema_round_7_survived','ema_round_7_entryfrag','ema_round_7_diffuser','ema_round_7_cluth',
+        'mihnea_round_7_opperator','mihnea_round_7_kills','mihnea_round_7_assists','mihnea_round_7_survived','mihnea_round_7_entryfrag','mihnea_round_7_diffuser','mihnea_round_7_cluth',
+        'round_8_site','round_8_side','round_8_win','round_8_rtype','round_8_endcondition','round_8_date',
+        'ema_round_8_opperator','ema_round_8_kills','ema_round_8_assists','ema_round_8_survived','ema_round_8_entryfrag','ema_round_8_diffuser','ema_round_8_cluth',
+        'mihnea_round_8_opperator','mihnea_round_8_kills','mihnea_round_8_assists','mihnea_round_8_survived','mihnea_round_8_entryfrag','mihnea_round_8_diffuser','mihnea_round_8_cluth',
+        'round_9_site','round_9_side','round_9_win','round_9_rtype','round_9_endcondition','round_9_date',
+        'ema_round_9_opperator','ema_round_9_kills','ema_round_9_assists','ema_round_9_survived','ema_round_9_entryfrag','ema_round_9_diffuser','ema_round_9_cluth',
+        'mihnea_round_9_opperator','mihnea_round_9_kills','mihnea_round_9_assists','mihnea_round_9_survived','mihnea_round_9_entryfrag','mihnea_round_9_diffuser','mihnea_round_9_cluth'
+    ]
+
+    line_dict = {key: (values[i] if i < len(values) else None) for i, key in enumerate(expected_columns)}
+
+    input_dict = {
+        'game_id': 0,  # Default ID since not provided in the old CSV
+        'date': line_dict.get('date'),
+        'map_name': line_dict.get('map_name'),
+        'game_win': line_dict.get('game_win'),  
+        'ban_a_us': line_dict.get('ban_a_us'),
+        'ban_a_op': line_dict.get('ban_a_op'),
+        'ban_d_us': line_dict.get('ban_d_us'),
+        'ban_d_op': line_dict.get('ban_d_op'),
+        'gtype': line_dict.get('gtype'),
+        'nrounds': line_dict.get('nrounds'),
+        'score_us': line_dict.get('score_us'),
+        'score_op': line_dict.get('score_op'),
+    }
+
+    for i in range(1, int(input_dict['nrounds'])+1):
+        input_dict[f'round_{i}_site'] = line_dict.get(f'round_{i}_site')
+        input_dict[f'round_{i}_side'] = line_dict.get(f'round_{i}_side')
+        input_dict[f'round_{i}_win'] = line_dict.get(f'round_{i}_win')
+        input_dict[f'round_{i}_rtype'] = determine_round_type(input_dict['gtype'], i, [line_dict[f'round_{j}_win'] for j in range(1, i+1)])
+        input_dict[f'round_{i}_endcondition'] = line_dict.get(f'round_{i}_endcondition')
+        input_dict[f'round_{i}_date'] = input_dict['date']
+
+        input_dict[f'ema_round_{i}_opperator'] = line_dict.get(f'ema_round_{i}_opperator')
+        input_dict[f'ema_round_{i}_kills'] = line_dict.get(f'ema_round_{i}_kills')
+        input_dict[f'ema_round_{i}_assists'] = line_dict.get(f'ema_round_{i}_assists')
+        input_dict[f'ema_round_{i}_survived'] = line_dict.get(f'ema_round_{i}_survived')
+        input_dict[f'ema_round_{i}_entryfrag'] = line_dict.get(f'ema_round_{i}_entryfrag')
+        input_dict[f'ema_round_{i}_diffuser'] = line_dict.get(f'ema_round_{i}_diffuser')
+        input_dict[f'ema_round_{i}_cluth'] = line_dict.get(f'ema_round_{i}_cluth')
+
+        input_dict[f'mihnea_round_{i}_opperator'] = line_dict.get(f'mihnea_round_{i}_opperator')
+        input_dict[f'mihnea_round_{i}_kills'] = line_dict.get(f'mihnea_round_{i}_kills')
+        input_dict[f'mihnea_round_{i}_assists'] = line_dict.get(f'mihnea_round_{i}_assists')
+        input_dict[f'mihnea_round_{i}_survived'] = line_dict.get(f'mihnea_round_{i}_survived')
+        input_dict[f'mihnea_round_{i}_entryfrag'] = line_dict.get(f'mihnea_round_{i}_entryfrag')
+        input_dict[f'mihnea_round_{i}_diffuser'] = line_dict.get(f'mihnea_round_{i}_diffuser')
+        input_dict[f'mihnea_round_{i}_cluth'] = line_dict.get(f'mihnea_round_{i}_cluth')
+
+    return input_dict
 
 
 def load_instances_from_csv(path):
-    pass
+    list_games_and_rounds = []
+    with open(path, 'r', encoding='utf-8') as file:
+        next(file)
+        for line in file:
+            input_dict = read_new_csv_line(line)
+            cleaned_dict = form_input_clean(input_dict)
+            game, rounds = create_game_and_rounds(cleaned_dict)
+            list_games_and_rounds.append((game, rounds))
+        
+    return list_games_and_rounds
+
 
 
 ## Functions for OLD CSV data processing
@@ -286,7 +380,7 @@ def read_old_csv_line(line):
     # check if all bas exist (not "") or all bans do not exist ("")
     if input_dict['ban_a_op'] == "" and input_dict['ban_d_op'] == "" and input_dict['ban_a_us'] == "" and input_dict['ban_d_us'] == "":
         input_dict['gtype'] = "Standard"
-    elif input_dict['ban_a_op'] != "" and input_dict['ban_d_op'] != "" and input_dict['ban_a_us'] != "" and input_dict['ban_d_us'] != "":
+    elif input_dict['ban_a_op'] != "" or input_dict['ban_d_op'] != "" or input_dict['ban_a_us'] != "" or input_dict['ban_d_us'] != "":
         input_dict['gtype'] = "Ranked"
     
     # Iterate over rounds to extract round-specific data
