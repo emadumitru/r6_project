@@ -4,9 +4,11 @@ st.set_page_config(page_title="R6 Siege Tracker", layout="wide")
 
 from frontend.app_format import *
 from frontend.tab_round import *
-from frontend.tab_summary import *
+import frontend.tab_summary as ts
+import frontend.tab_recommandation as tr
 from frontend.support_frontend import *
 from backend.support_backfront import *
+
 
 
 initialize_session_var()
@@ -47,4 +49,8 @@ with tab2:
     add_new_round()
 
 with tab3:
-    print_summary_match()
+    ts.print_summary_match()
+
+with tab4:
+    if get_random_opperators:
+        tr.print_random_recommendations(rec)

@@ -1,5 +1,6 @@
 from backend.class_recommender import Recommender
 from backend.support_functions import *
+from backend.algo_randomizer import *
 
 
 # rec = Recommender()
@@ -25,12 +26,19 @@ from backend.support_functions import *
 # rec.save_to_csv()
 
 
-rec = Recommender()
-rec.load_from_csv()
-rec.save_to_csv()
+# rec = Recommender()
+# rec.load_from_csv()
+# rec.save()
+# rec.save_to_csv()
 
 
-# rec = Recommender().load()
+rec = Recommender().load()
+# attack, defense = get_random_operators(rec, formula_weight=100, op_count=5)
+# for ema, mihnea in attack:
+#     print(f'Attack - Ema: {ema}, Mihnea: {mihnea}')
+# for ema, mihnea in defense:
+#     print(f'Defense - Ema: {ema}, Mihnea: {mihnea}')
+
 
 
 

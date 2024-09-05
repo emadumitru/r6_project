@@ -11,7 +11,7 @@
 - [x] fix bans showing up in standard
 - [x] round end condition does not save (empty)
 - [x] load from new CSV
-- [] get random opperators
+- [x] get random opperators
 - [] get statistics map
 - [] get recommendations opperators
 
@@ -19,3 +19,4 @@
 # Less urgent tasks
 - [] rename all sites
 - [] make some sort of border on selected operator image
+- [] layout recom tab
