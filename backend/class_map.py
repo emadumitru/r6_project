@@ -23,7 +23,7 @@ class Rmap:
     def update_map(self, game, rounds):
         self.games[game.id] = game
         for round in rounds:
-            if round.site not in self.sites[round.side].values():
+            if round.site not in self.sites[round.side].keys():
                 self.initialize_sites([round.site])
             self.sites[round.side][round.site].add_round(round)
             self.rounds[round.id] = round

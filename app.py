@@ -45,6 +45,7 @@ if st.sidebar.button("Save to csv"):
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["Statistics", "Round", "Summary", "Recommendation", "Edit"])
 with tab1:
     tstat.print_map_stats(rec)
+    tstat.print_site_stats(rec, st.session_state.selected_map)
 
 with tab2:
     add_new_round()

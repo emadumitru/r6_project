@@ -13,7 +13,7 @@
 - [x] load from new CSV
 - [x] get random opperators
 - [x] get statistics map
-- [] get statistics site
+- [x] get statistics site
 - [] get recommendations opperators
 - [] random tab, timeframurile mici nu folosesc toti operatorii + div by 0 (e.g., if no ash last season still have Ash as option)
 

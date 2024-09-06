@@ -32,7 +32,12 @@ from backend.algo_randomizer import *
 # rec.save_to_csv()
 
 
-rec = Recommender().load()
+# rec = Recommender().load()
+# rec.save_to_csv()
+
+
+
+
 # attack, defense = get_random_operators(rec, formula_weight=100, op_count=5)
 # for ema, mihnea in attack:
 #     print(f'Attack - Ema: {ema}, Mihnea: {mihnea}')
