@@ -1,6 +1,9 @@
 import random
 import datetime
 
+attack_opperators = ['Blitz', 'Jackal', 'Iq', 'Thatcher', 'Nokk', 'Nomad', 'Striker', 'Thermite', 'Dokkaebi', 'Hibana', 'Ace', 'Blackbeard', 'Lion', 'Iana', 'Ash', 'Grim', 'Buck', 'Sledge', 'Fuze', 'Capitao', 'Ying', 'Zofia', 'Brava', 'Amaru', 'Gridlock', 'Maverick', 'Osa', 'Zero', 'Sens', 'Flores', 'Deimos', 'Montagne', 'Kali', 'Twitch', 'Glaz', 'Finka', 'Ram']
+defense_opperators = ['Thunderbird', 'Maestro', 'Tachanka', 'Warden', 'Melusi', 'Wamai', 'Mira', 'Kaid', 'Frost', 'Rook', 'Oryx', 'Mozzie', 'Jager', 'Echo', 'Vigil', 'Valkyrie', 'Kapkan', 'Sentry', 'Bandit', 'Lesion', 'Fenrir', 'Doc', 'Smoke', 'Azami', 'Castle', 'Caveira', 'Pulse', 'Aruni', 'Goyo', 'Mute', 'Solis', 'Tubarao', 'Thorn', 'Ela', 'Ram', 'Alibi', 'Clash']
+
 def get_round_in_period(rec, period_start, period_end):
     """Function to get rounds in a period"""
     rounds = []
@@ -9,16 +12,13 @@ def get_round_in_period(rec, period_start, period_end):
             for round in map.rounds.values():
                 rounds.append(round)
     else:
-        if period_end is None:
-            # get period_end to be tomorrow
-            period_end = datetime.date.today() + datetime.timedelta(days=1)
         for map in rec.maps.values():
             for round in map.rounds.values():
                 if round.date not in [None, 'None', '']:
-                    if period_start <= round.date <= period_end:
-                        rounds.append(round)
+                    if period_start <= round.date:
+                        if period_end is None or round.date <= period_end:
+                            rounds.append(round)
     return rounds
-
 
 def get_opperators_history(rounds):
     history = {'Ema-Attack': [], 'Ema-Defense': [], 'Mihnea-Attack': [], 'Mihnea-Defense': []}
@@ -37,8 +37,19 @@ def get_opperators_history(rounds):
 def get_history_balance(history):
     """Function to get distribution of operators for each player and side as well as the maximum amount"""
     balance = {'Ema-Attack': {}, 'Ema-Defense': {}, 'Mihnea-Attack': {}, 'Mihnea-Defense': {}}
+    
+    # Initialize balance with all operators set to 0
+    for key in balance:
+        if "Attack" in key:
+            balance[key] = {op: 0 for op in attack_opperators}
+        elif "Defense" in key:
+            balance[key] = {op: 0 for op in defense_opperators}
+    
+    # Count the occurrences of each operator in the history
     for key, value in history.items():
-        balance[key] = {op: value.count(op) for op in value}
+        for op in value:
+            balance[key][op] += 1
+            
     return balance
 
 
@@ -55,20 +66,24 @@ def compute_weights(balance_count, formula_weight):
 
     if formula_weight == 100:
         # Prefer less frequently played operators
-        weights = [1 / (count + 1) for count in operators_playcount]
+        # Add a small constant to avoid division by zero
+        weights = [1 / (count + 1e-9) for count in operators_playcount]
     elif formula_weight == 0:
         # Completely random (uniform distribution)
         weights = [1 for _ in operators_playcount]
     else:
         # Blend between uniform and inverse of play count
         uniform_weight = 1 / len(operators)
-        play_count_weights = [1 / (count + 1) for count in operators_playcount]
+        play_count_weights = [1 / (count + 1e-9) for count in operators_playcount]  # Avoid zero division
         weights = [(1 - formula_weight / 100) * uniform_weight + (formula_weight / 100) * play_count_weight
                    for play_count_weight in play_count_weights]
 
     # Normalize weights to sum to 1
     total_weight = sum(weights)
-    normalized_weights = [weight / total_weight for weight in weights]
+    if total_weight == 0:
+        normalized_weights = [1 / len(weights)] * len(weights)  # Uniform distribution if total weight is 0
+    else:
+        normalized_weights = [weight / total_weight for weight in weights]
 
     return operators, normalized_weights
 
@@ -97,6 +112,7 @@ def get_random_operators(rec, formula_weight=50, op_count=5, period_start=None, 
     :param op_count: int - number of operators to get
     :return: tuple - (attack operators, defense operators)
     """
+
     rounds = get_round_in_period(rec, period_start, period_end)
     history = get_opperators_history(rounds)
     balance = get_history_balance(history)
