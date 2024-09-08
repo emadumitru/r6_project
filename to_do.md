@@ -23,6 +23,7 @@
 - [] rename all sites
 - [] make some sort of border on selected operator image
 - [] layout recom tab
+- [] better site names
 
 
 # Will be to do after ema is done
