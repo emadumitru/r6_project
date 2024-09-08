@@ -70,6 +70,7 @@ def display_operator_selection(player_name, operators_dict):
     images = [operators_dict[name] for name in operator_names]
 
     # Display clickable images and get the index of the clicked image
+    st.write(f"DEbug statemant: {player_name}'s Operator")
     clicked = clickable_images(
         images,
         titles=operator_names,
