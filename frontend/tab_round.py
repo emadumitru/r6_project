@@ -137,7 +137,7 @@ def display_operator_selection(player_name, operators_dict):
 
 def print_round_overview():
     round = st.session_state['current_round']
-    st.write(f'**Round {len(st.session_state.rounds)+1}**: {round["site"]} - {round["side"]} - {"Win" if round["win"] else "Loss"}')
+    st.write(f'**Round {len(st.session_state.rounds)+1}**: {round["site"]} - {round["side"]} - {"Win" if round["win"] else "Loss"} - {round["endcondition"]}')
     ema = round["players"]["Ema"]
     mihnea = round["players"]["Mihnea"]
 
@@ -148,10 +148,10 @@ def print_round_overview():
     # Display player data in a nicely formatted table
     st.markdown(
         """
-        | **Player** | **Operator** | **Kills** | **Assists** | **Survived** | **EntryFrag** | **Diffuser** | **Clutch** |
-        |------------|-------------------|-----------|-------------|---------------|----------------|--------------|------------|
-        | **Ema**    | {ema_operator} | {ema_kills} | {ema_assists} | {ema_surv} | {ema_ef} | {ema_dif} | {ema_cl} |
-        | **Mihnea** | {mihnea_operator} | {mihnea_kills} | {mihnea_assists} | {mihnea_surv} | {mihnea_ef} | {mihnea_dif} | {mihnea_cl} |
+        | **Player** | **Operator** | **Kills** | **Assists** | **Survived** | **EntryFrag** | **Diffuser** | **Clutch** | **TKills** | **TDeaths** | **TAssists** |
+        |------------|-------------------|-----------|-------------|---------------|----------------|--------------|------------|-|-|-|
+        | **Ema**    | {ema_operator} | {ema_kills} | {ema_assists} | {ema_surv} | {ema_ef} | {ema_dif} | {ema_cl} | {ema_tkills} | {ema_tdeaths} | {ema_tassists} |
+        | **Mihnea** | {mihnea_operator} | {mihnea_kills} | {mihnea_assists} | {mihnea_surv} | {mihnea_ef} | {mihnea_dif} | {mihnea_cl} | {mihnea_tkills} | {mihnea_tdeaths} | {mihnea_tassists} |
         """.format(
             ema_operator=ema["operator"],
             ema_kills=ema["kills"],
@@ -160,6 +160,9 @@ def print_round_overview():
             ema_ef=icon(ema["entryfrag"]),
             ema_dif=icon(ema["diffuser"]),
             ema_cl=icon(ema["clutch"]),
+            ema_tkills=ema["kills"]+sum([int(r["players"]["Ema"]["kills"]) for r in st.session_state["rounds"]]),
+            ema_tdeaths=(not ema["survived"])+(sum([(not r["players"]["Ema"]["survived"]) for r in st.session_state["rounds"]])),
+            ema_tassists=ema["assists"]+sum([int(r["players"]["Ema"]["assists"]) for r in st.session_state["rounds"]]),
             mihnea_operator=mihnea["operator"],
             mihnea_kills=mihnea["kills"],
             mihnea_assists=mihnea["assists"],
@@ -167,6 +170,9 @@ def print_round_overview():
             mihnea_ef=icon(mihnea["entryfrag"]),
             mihnea_dif=icon(mihnea["diffuser"]),
             mihnea_cl=icon(mihnea["clutch"]),
+            mihnea_tkills=mihnea["kills"]+sum([int(r["players"]["Mihnea"]["kills"]) for r in st.session_state["rounds"]]),
+            mihnea_tdeaths=(not mihnea["survived"])+(sum([(not r["players"]["Mihnea"]["survived"]) for r in st.session_state["rounds"]])),
+            mihnea_tassists=mihnea["assists"]+sum([int(r["players"]["Mihnea"]["assists"]) for r in st.session_state["rounds"]])
         )
     )
 
@@ -212,3 +218,5 @@ def add_new_round():
         st.session_state["rounds"].append(deepcopy(st.session_state["current_round"]))
         st.success("Round data submitted successfully!")
         initialize_session_state()  # Re-initialize for the next round
+
+    

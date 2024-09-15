@@ -1,6 +1,6 @@
 # TODO List
 - [x] Check why round summary keeps only last round
-- [] check opperators doubling images
+- [x] check opperators doubling images
 - [] make summary tab
 - [] make edit tab
 - [x] some maps don't work becuase of sites
