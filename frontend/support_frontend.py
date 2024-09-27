@@ -37,8 +37,12 @@ def load_operators(json_path):
         return {}
 
 def get_op_names():
+    current_path = os.path.dirname(__file__)
+    rainbow6_path = os.path.join(current_path, os.pardir)
     attackers_json_path = 'data/attackers.json'
     defenders_json_path = 'data/defenders.json'
+    attackers_json_path = os.path.join(rainbow6_path, attackers_json_path)
+    defenders_json_path = os.path.join(rainbow6_path, defenders_json_path)
     attackers = load_operators(attackers_json_path)
     defenders = load_operators(defenders_json_path)
     return list(attackers.keys()), list(defenders.keys())

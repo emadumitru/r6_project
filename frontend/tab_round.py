@@ -6,8 +6,12 @@ from copy import deepcopy  # Import deepcopy
 
 
 # Paths to the JSON files containing attacker and defender data
+current_path = os.path.dirname(__file__)
+rainbow6_path = os.path.join(current_path, os.pardir)
 attackers_json_path = 'data/attackers.json'
 defenders_json_path = 'data/defenders.json'
+attackers_json_path = os.path.join(rainbow6_path, attackers_json_path)
+defenders_json_path = os.path.join(rainbow6_path, defenders_json_path)
 
 # Function to load operators from JSON files
 def load_operators(json_path):
