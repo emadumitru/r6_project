@@ -2,9 +2,9 @@
 - [x] Check why round summary keeps only last round
 - [x] check opperators doubling images
 - [] make summary tab
-- [] make edit tab
+- [] make edit tab - bigger task
 - [x] some maps don't work becuase of sites
-- [] reset game button
+- [x] reset game button
 - [x] match summary formats in round and summary tab
 - [] add type of end round to summary
 - [] make shorter summary in the end round area
@@ -28,3 +28,4 @@
 
 # Will be to do after ema is done
 - [] layout stat tab
+- [] sidebar better layout
