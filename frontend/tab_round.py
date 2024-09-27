@@ -64,14 +64,14 @@ def display_operator_selection(player_name, operators_dict):
     st.subheader(f"{player_name}'s Round")
     st.write("##### Operator")
 
+    # Ensure unique session state for each player's operator based on side
     if f"{player_name}_selected_operator" not in st.session_state:
         st.session_state[f"{player_name}_selected_operator"] = None
 
-    # Prepare operator names and images
     operator_names = list(operators_dict.keys())
     images = [operators_dict[name] for name in operator_names]
 
-    # Display clickable images and get the index of the clicked image
+    # Display clickable images for the current player only
     clicked = clickable_images(
         images,
         titles=operator_names,
@@ -79,24 +79,24 @@ def display_operator_selection(player_name, operators_dict):
             "display": "flex",
             "justify-content": "left",
             "flex-wrap": "wrap",
-            "gap": "auto"  # Adds some space between images
+            "gap": "auto"
         },
         img_style={
-            "flex": "1 0 14.28%",  # Ensures each image takes exactly 1/7th of the row
-            "max-width": "14.28%",  # Forces exactly 7 images per row
-            "height": "auto",  # Maintains aspect ratio
+            "flex": "1 0 14.28%",
+            "max-width": "14.28%",
+            "height": "auto",
             "cursor": "pointer"
         },
-        key=f"{player_name}_newround_clickable_images",
+        key=f"{player_name}_clickable_images_{st.session_state['current_side']}"  # Ensure unique key per player/side
     )
 
-    # Update session state if an image is clicked
+    # Update session state based on clicked image
     if clicked > -1:
         selected_operator = operator_names[clicked]
         st.session_state[f"{player_name}_selected_operator"] = selected_operator
         st.session_state["current_round"]["players"][player_name]["operator"] = selected_operator
 
-    # Show the currently selected operator
+    # Display the selected operator
     selected_operator = st.session_state[f"{player_name}_selected_operator"]
     if selected_operator:
         st.write(f"Selected Operator: **{selected_operator}**")
@@ -134,7 +134,6 @@ def display_operator_selection(player_name, operators_dict):
         f"Did {player_name} clutch the round?", value=st.session_state["current_round"]["players"][player_name]["clutch"],
         key=f"{player_name}_newround_clutch_checkbox"
     )
-
 def print_round_overview():
     round = st.session_state['current_round']
     st.write(f'**Round {len(st.session_state.rounds)+1}**: {round["site"]} - {round["side"]} - {"Win" if round["win"] else "Loss"} - {round["endcondition"]}')
@@ -175,21 +174,33 @@ def print_round_overview():
             mihnea_tassists=mihnea["assists"]+sum([int(r["players"]["Mihnea"]["assists"]) for r in st.session_state["rounds"]])
         )
     )
+    len_rounds = len(st.session_state['rounds']) + 1
+    score_us = len([round for round in st.session_state['rounds'] if round['win']]) + round['win']
+    score_op = len_rounds - score_us
+    st.write(f'Current score: {score_us} - {score_op}')
 
-# Function to add a new round form
 def add_new_round():
     # Initialize session state for rounds
     initialize_session_state()
+
+    st.write(f"#### Round {len(st.session_state['rounds']) + 1}")
 
     # Side selection, updating only if a change is detected to prevent re-renders
     col1, col2 = st.columns(2)
     with col1:
         selected_side = st.radio("Side", ["Attack", "Defense"], key="side", horizontal=True)
-        if st.session_state.get("current_side") != selected_side:
+        st.session_state["current_round"]["side"] = selected_side
+
+        # Only change the side if it's different from the previous one
+        if "current_side" not in st.session_state or st.session_state["current_side"] != selected_side:
             st.session_state["current_side"] = selected_side
-            # Reset selected operators when side changes to avoid duplicates
+            # Reset the selected operators for the current side to prevent double loading
             st.session_state["Ema_selected_operator"] = None
             st.session_state["Mihnea_selected_operator"] = None
+
+            st.write(f"Side changed to {selected_side}. Operators reset.")
+        else:
+            st.write(f"Side unchanged. Current side: {st.session_state['current_side']}")
 
     # Result and End Condition
     with col2:
@@ -198,22 +209,31 @@ def add_new_round():
     st.session_state["current_round"]["endcondition"] = st.radio(
         "End Condition", ["Time Expired", "Wiped Out", "Defused"], key="end_condition", horizontal=True)
 
-    # Use the appropriate operator dictionary based on the selected side
-    operator_dict = attackers if st.session_state["current_side"] == "Attack" else defenders
+    # Load the correct operator dictionary based on the current side
+    if selected_side == "Attack":
+        operator_dict = attackers
+        st.write("Attackers loaded for operator selection.")
+    else:
+        operator_dict = defenders
+        st.write("Defenders loaded for operator selection.")
 
-    # Containers for player selections
+    # Create columns for Ema and Mihnea operator selection
     col1, col2 = st.columns(2)
+    
+    # Ema's column
     with col1:
-        st.write(f"Displaying Ema's Selection for **{st.session_state['current_side']}**")
+        # st.write(f"Displaying Ema's Selection for **{selected_side}**")
         display_operator_selection("Ema", operator_dict)
 
+    # Mihnea's column
     with col2:
-        st.write(f"Displaying Mihnea's Selection for **{st.session_state['current_side']}**")
+        # st.write(f"Displaying Mihnea's Selection for **{selected_side}**")
         display_operator_selection("Mihnea", operator_dict)
 
-    # Add button to submit the current round data
+    # Print round overview and add submit button
     st.divider()
     print_round_overview()
+
     if st.button("Submit Round Data", key=f"submit_newround_{len(st.session_state['rounds'])}"):
         st.session_state["rounds"].append(deepcopy(st.session_state["current_round"]))
         st.success("Round data submitted successfully!")
