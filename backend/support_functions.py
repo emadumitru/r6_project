@@ -19,7 +19,7 @@ def determine_round_type(gtype, round_number, roundwins):
     :param roundwins: A list of booleans representing the round wins.
     :return: A string representing the round type.
     """
-    if gtype == 'ranked':
+    if gtype == 'Ranked':
         if round_number in [7, 9]:
             return 'overtime'
         elif roundwins.count(True) == 4:
@@ -32,7 +32,7 @@ def determine_round_type(gtype, round_number, roundwins):
             return 'matchpoint-op'
         else:
             return 'normal'
-    if gtype == 'standard':
+    if gtype == 'Standard':
         if round_number == 7:
             return 'overtime'
         elif roundwins.count(True) == 3:
@@ -41,7 +41,7 @@ def determine_round_type(gtype, round_number, roundwins):
             return 'matchpoint-op'
         else:
             return 'normal'
-    if gtype == 'quick':
+    if gtype == 'Quick':
         if round_number == 5:
             return 'overtime'
         elif roundwins.count(True) == 2:
@@ -76,7 +76,7 @@ def create_game_and_rounds(input_dict):
     score_op = input_dict['score_op']
 
     # Initialize rounds dictionary
-    rounds = {}
+    rounds = []
     round_wins = [input_dict[f'round_{i}_win'] for i in range(1, nrounds + 1)]
 
     # Create rounds based on available rounds in input_dict
@@ -117,7 +117,7 @@ def create_game_and_rounds(input_dict):
 
         # Create Round object and add to rounds dictionary
         round_obj = Round(round_id, game_id, round_number, round_data)
-        rounds[round_id] = round_obj
+        rounds.append(round_obj)
         round_id += 1
 
     # Create the game_data dictionary to pass to the Game constructor
@@ -136,9 +136,9 @@ def create_game_and_rounds(input_dict):
     }
 
     # Create Game object
-    game_obj = Game(game_id, rounds, game_data)
+    game_obj = Game(game_id, game_data)
 
-    return game_obj
+    return game_obj, rounds
 
 def form_input_clean(input_dict):
     """
@@ -177,7 +177,10 @@ def form_input_clean(input_dict):
             if type(value) == datetime.date:
                 return value
             elif type(value) == str:
-                return datetime.datetime.strptime(value, '%m/%d/%Y').date()
+                if '/' in value:
+                    return datetime.datetime.strptime(value, '%m/%d/%Y').date()
+                elif '-' in value:
+                    return datetime.datetime.strptime(value, '%Y-%m-%d').date()
             else:
                 return None
         except (TypeError, ValueError):
@@ -203,10 +206,14 @@ def form_input_clean(input_dict):
         # Round-specific keys
         cleaned_dict[f'round_{i}_number'] = i
         cleaned_dict[f'round_{i}_site'] = to_str(input_dict.get(f'round_{i}_site'))
-        cleaned_dict[f'round_{i}_side'] = to_str(input_dict.get(f'round_{i}_side')).lower()
+        cleaned_dict[f'round_{i}_side'] = to_str(input_dict.get(f'round_{i}_side'))
         cleaned_dict[f'round_{i}_win'] = to_bool(input_dict.get(f'round_{i}_win'))
         cleaned_dict[f'round_{i}_endcondition'] = to_str(input_dict.get(f'round_{i}_endcondition'))
         cleaned_dict[f'round_{i}_date'] = cleaned_dict['date']
+        if 'round_{i}_rtype' in input_dict:
+            cleaned_dict[f'round_{i}_rtype'] = to_str(input_dict.get(f'round_{i}_rtype'))
+        else:
+            cleaned_dict[f'round_{i}_rtype'] = ''
 
         # Player-specific keys for 'ema'
         cleaned_dict[f'ema_round_{i}_opperator'] = to_str(input_dict.get(f'ema_round_{i}_opperator'))
@@ -229,10 +236,97 @@ def form_input_clean(input_dict):
     return cleaned_dict
 
 
+def read_new_csv_line(line):
+    values = line.strip().split(',')
+
+    expected_columns = [
+        'date','map_name','game_win','ban_a_us','ban_a_op','ban_d_us','ban_d_op',
+        'gtype','nrounds','score_us','score_op',
+        'round_1_site','round_1_side','round_1_win','round_1_rtype','round_1_endcondition','round_1_date',
+        'ema_round_1_opperator','ema_round_1_kills','ema_round_1_assists','ema_round_1_survived','ema_round_1_entryfrag','ema_round_1_diffuser','ema_round_1_cluth',
+        'mihnea_round_1_opperator','mihnea_round_1_kills','mihnea_round_1_assists','mihnea_round_1_survived','mihnea_round_1_entryfrag','mihnea_round_1_diffuser','mihnea_round_1_cluth',
+        'round_2_site','round_2_side','round_2_win','round_2_rtype','round_2_endcondition','round_2_date',
+        'ema_round_2_opperator','ema_round_2_kills','ema_round_2_assists','ema_round_2_survived','ema_round_2_entryfrag','ema_round_2_diffuser','ema_round_2_cluth',
+        'mihnea_round_2_opperator','mihnea_round_2_kills','mihnea_round_2_assists','mihnea_round_2_survived','mihnea_round_2_entryfrag','mihnea_round_2_diffuser','mihnea_round_2_cluth',
+        'round_3_site','round_3_side','round_3_win','round_3_rtype','round_3_endcondition','round_3_date',
+        'ema_round_3_opperator','ema_round_3_kills','ema_round_3_assists','ema_round_3_survived','ema_round_3_entryfrag','ema_round_3_diffuser','ema_round_3_cluth',
+        'mihnea_round_3_opperator','mihnea_round_3_kills','mihnea_round_3_assists','mihnea_round_3_survived','mihnea_round_3_entryfrag','mihnea_round_3_diffuser','mihnea_round_3_cluth',
+        'round_4_site','round_4_side','round_4_win','round_4_rtype','round_4_endcondition','round_4_date',
+        'ema_round_4_opperator','ema_round_4_kills','ema_round_4_assists','ema_round_4_survived','ema_round_4_entryfrag','ema_round_4_diffuser','ema_round_4_cluth',
+        'mihnea_round_4_opperator','mihnea_round_4_kills','mihnea_round_4_assists','mihnea_round_4_survived','mihnea_round_4_entryfrag','mihnea_round_4_diffuser','mihnea_round_4_cluth',
+        'round_5_site','round_5_side','round_5_win','round_5_rtype','round_5_endcondition','round_5_date',
+        'ema_round_5_opperator','ema_round_5_kills','ema_round_5_assists','ema_round_5_survived','ema_round_5_entryfrag','ema_round_5_diffuser','ema_round_5_cluth',
+        'mihnea_round_5_opperator','mihnea_round_5_kills','mihnea_round_5_assists','mihnea_round_5_survived','mihnea_round_5_entryfrag','mihnea_round_5_diffuser','mihnea_round_5_cluth',
+        'round_6_site','round_6_side','round_6_win','round_6_rtype','round_6_endcondition','round_6_date',
+        'ema_round_6_opperator','ema_round_6_kills','ema_round_6_assists','ema_round_6_survived','ema_round_6_entryfrag','ema_round_6_diffuser','ema_round_6_cluth',
+        'mihnea_round_6_opperator','mihnea_round_6_kills','mihnea_round_6_assists','mihnea_round_6_survived','mihnea_round_6_entryfrag','mihnea_round_6_diffuser','mihnea_round_6_cluth',
+        'round_7_site','round_7_side','round_7_win','round_7_rtype','round_7_endcondition','round_7_date',
+        'ema_round_7_opperator','ema_round_7_kills','ema_round_7_assists','ema_round_7_survived','ema_round_7_entryfrag','ema_round_7_diffuser','ema_round_7_cluth',
+        'mihnea_round_7_opperator','mihnea_round_7_kills','mihnea_round_7_assists','mihnea_round_7_survived','mihnea_round_7_entryfrag','mihnea_round_7_diffuser','mihnea_round_7_cluth',
+        'round_8_site','round_8_side','round_8_win','round_8_rtype','round_8_endcondition','round_8_date',
+        'ema_round_8_opperator','ema_round_8_kills','ema_round_8_assists','ema_round_8_survived','ema_round_8_entryfrag','ema_round_8_diffuser','ema_round_8_cluth',
+        'mihnea_round_8_opperator','mihnea_round_8_kills','mihnea_round_8_assists','mihnea_round_8_survived','mihnea_round_8_entryfrag','mihnea_round_8_diffuser','mihnea_round_8_cluth',
+        'round_9_site','round_9_side','round_9_win','round_9_rtype','round_9_endcondition','round_9_date',
+        'ema_round_9_opperator','ema_round_9_kills','ema_round_9_assists','ema_round_9_survived','ema_round_9_entryfrag','ema_round_9_diffuser','ema_round_9_cluth',
+        'mihnea_round_9_opperator','mihnea_round_9_kills','mihnea_round_9_assists','mihnea_round_9_survived','mihnea_round_9_entryfrag','mihnea_round_9_diffuser','mihnea_round_9_cluth'
+    ]
+
+    line_dict = {key: (values[i] if i < len(values) else None) for i, key in enumerate(expected_columns)}
+
+    input_dict = {
+        'game_id': 0,  # Default ID since not provided in the old CSV
+        'date': line_dict.get('date'),
+        'map_name': line_dict.get('map_name'),
+        'game_win': line_dict.get('game_win'),  
+        'ban_a_us': line_dict.get('ban_a_us'),
+        'ban_a_op': line_dict.get('ban_a_op'),
+        'ban_d_us': line_dict.get('ban_d_us'),
+        'ban_d_op': line_dict.get('ban_d_op'),
+        'gtype': line_dict.get('gtype'),
+        'nrounds': line_dict.get('nrounds'),
+        'score_us': line_dict.get('score_us'),
+        'score_op': line_dict.get('score_op'),
+    }
+
+    for i in range(1, int(input_dict['nrounds'])+1):
+        input_dict[f'round_{i}_site'] = line_dict.get(f'round_{i}_site')
+        input_dict[f'round_{i}_side'] = line_dict.get(f'round_{i}_side')
+        input_dict[f'round_{i}_win'] = line_dict.get(f'round_{i}_win')
+        input_dict[f'round_{i}_rtype'] = determine_round_type(input_dict['gtype'], i, [line_dict[f'round_{j}_win'] for j in range(1, i+1)])
+        input_dict[f'round_{i}_endcondition'] = line_dict.get(f'round_{i}_endcondition')
+        input_dict[f'round_{i}_date'] = input_dict['date']
+
+        input_dict[f'ema_round_{i}_opperator'] = line_dict.get(f'ema_round_{i}_opperator')
+        input_dict[f'ema_round_{i}_kills'] = line_dict.get(f'ema_round_{i}_kills')
+        input_dict[f'ema_round_{i}_assists'] = line_dict.get(f'ema_round_{i}_assists')
+        input_dict[f'ema_round_{i}_survived'] = line_dict.get(f'ema_round_{i}_survived')
+        input_dict[f'ema_round_{i}_entryfrag'] = line_dict.get(f'ema_round_{i}_entryfrag')
+        input_dict[f'ema_round_{i}_diffuser'] = line_dict.get(f'ema_round_{i}_diffuser')
+        input_dict[f'ema_round_{i}_cluth'] = line_dict.get(f'ema_round_{i}_cluth')
+
+        input_dict[f'mihnea_round_{i}_opperator'] = line_dict.get(f'mihnea_round_{i}_opperator')
+        input_dict[f'mihnea_round_{i}_kills'] = line_dict.get(f'mihnea_round_{i}_kills')
+        input_dict[f'mihnea_round_{i}_assists'] = line_dict.get(f'mihnea_round_{i}_assists')
+        input_dict[f'mihnea_round_{i}_survived'] = line_dict.get(f'mihnea_round_{i}_survived')
+        input_dict[f'mihnea_round_{i}_entryfrag'] = line_dict.get(f'mihnea_round_{i}_entryfrag')
+        input_dict[f'mihnea_round_{i}_diffuser'] = line_dict.get(f'mihnea_round_{i}_diffuser')
+        input_dict[f'mihnea_round_{i}_cluth'] = line_dict.get(f'mihnea_round_{i}_cluth')
+
+    return input_dict
 
 
 def load_instances_from_csv(path):
-    pass
+    list_games_and_rounds = []
+    with open(path, 'r', encoding='utf-8') as file:
+        next(file)
+        for line in file:
+            input_dict = read_new_csv_line(line)
+            cleaned_dict = form_input_clean(input_dict)
+            game, rounds = create_game_and_rounds(cleaned_dict)
+            list_games_and_rounds.append((game, rounds))
+        
+    return list_games_and_rounds
+
 
 
 ## Functions for OLD CSV data processing
@@ -286,7 +380,7 @@ def read_old_csv_line(line):
     # check if all bas exist (not "") or all bans do not exist ("")
     if input_dict['ban_a_op'] == "" and input_dict['ban_d_op'] == "" and input_dict['ban_a_us'] == "" and input_dict['ban_d_us'] == "":
         input_dict['gtype'] = "Standard"
-    elif input_dict['ban_a_op'] != "" and input_dict['ban_d_op'] != "" and input_dict['ban_a_us'] != "" and input_dict['ban_d_us'] != "":
+    elif input_dict['ban_a_op'] != "" or input_dict['ban_d_op'] != "" or input_dict['ban_a_us'] != "" or input_dict['ban_d_us'] != "":
         input_dict['gtype'] = "Ranked"
     
     # Iterate over rounds to extract round-specific data
@@ -375,9 +469,9 @@ def clean_format(input_dict):
     def to_sides(value):
         """Convert to string or return None if conversion fails."""
         if value in ['1', 1]:
-            return 'attack'
+            return 'Attack'
         elif value in ['2', 2]:
-            return 'defense'
+            return 'Defense'
         else:
             return None
 
@@ -436,7 +530,7 @@ def old_input_clean_data(rec):
 
     # change map names
     # map names exist in Map, Game, Site
-    # change in rec.maps, rec.maps.sites, rec.games
+    # change in rec.maps, rec.maps.sites, rec.maps.games
     list_old_names = ['Club House', 'Kafe', 'Emerald', 'Nighthaven']
     list_new_names = ['Clubhouse', 'Kafe Dostoyevsky', 'Emerald Plains', 'Nighthaven Labs']
 
@@ -446,14 +540,68 @@ def old_input_clean_data(rec):
         except KeyError:
             pass
         rec.maps[new_name].name = new_name
-        for site in rec.maps[new_name].sites.values():
+        for site in rec.maps[new_name].sites["Attack"].values():
             site.map_name = new_name
-        for game in rec.games.values():
+        for site in rec.maps[new_name].sites["Defense"].values():
+            site.map_name = new_name
+        for game in rec.maps[new_name].games.values():
             if game.map_name == old_name:
                 game.map_name = new_name
 
+    list_sites_per_map = {}
     list_sites_per_map = {
-        'Clubhouse': {1: 'Church and Arsenal', 2: 'Cash and CCTV', 3: 'Bar and Gaming', 4: 'Master and Gym'},
+        'Clubhouse': {'1': 'Gym', '2': 'Cash', '3': 'Bar', '4': 'Basement'},
+        'Kafe Dostoyevsky': {'1': 'Cocktail', '2': 'Mining', '3': 'Reading', '4': 'Kitchen'},
+        'Emerald Plains': {'1': 'CEO', '2': 'Painting', '3': 'Bar', '4': 'Kitchen'},
+        # 'Nighthaven Labs': {'1': '', '2': '', '3': '', '4': ''},
+        # 'Bank': {'1': 'CEO', '2': 'Open Area', '3': '', '4': ''},
+        # 'Border': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Chalet': {'1': 'Bedroom', '2': ' ', '3': '  ', '4': 'Garage'},
+        'Coastline': {'1': 'Hooka', '2': 'Theater', '3': 'Bar', '4': 'Kitchen'},
+        # 'Consulate': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Favela': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Hereford Base': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'House': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Kanal': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Oregon': {'1': 'Dorms', '2': '', '3': 'Open Area', '4': 'Basement'},
+        'Outback': {'1': 'Laundry', '2': 'Party', '3': 'Green/Red', '4': 'Kitchen'},
+        # 'Plane': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        'Skyscraper': {'1': 'Tea Room', '2': 'Exhibition', '3': 'Bedroom', '4': 'BBQ'},
+        'Theme Park': {'1': 'Initiation', '2': 'Daycare', '3': 'Throne', '4': 'Lab'},
+        # 'Tower': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Villa': {'1': 'Aviator', '2': 'Statuary', '3': '', '4': ''},
+        # 'Yacht': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Lair': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        # 'Stadium': {'1': '', '2': ' ', '3': '  ', '4': '   '}
     }
+
+    # change site names
+    # site names exist in Site, Round and in dictionary key in Map.site
+    # change in rec.maps.sites.names, rec.maps.sites second key, rec.maps.rounds.site, rec.maps.sites.rounds.site
+
+    for map_name, sites_dictionary in list_sites_per_map.items():
+        if map_name in rec.maps.keys():
+            for old, new in sites_dictionary.items():
+                if old in rec.maps[map_name].sites["Attack"]:
+                    rec.maps[map_name].sites["Attack"][new] = rec.maps[map_name].sites["Attack"].pop(old)
+                    rec.maps[map_name].sites["Attack"][new].name = new
+                    for round in rec.maps[map_name].sites["Attack"][new].rounds.values():
+                        if round.site == old:
+                            round.site = new
+                else:
+                    print(f"Attack {old} not found in {map_name}")
+                if old in rec.maps[map_name].sites["Defense"]:
+                    rec.maps[map_name].sites["Defense"][new] = rec.maps[map_name].sites["Defense"].pop(old)
+                    rec.maps[map_name].sites["Defense"][new].name = new
+                    for round in rec.maps[map_name].sites["Defense"][new].rounds.values():
+                        if round.site == old:
+                            round.site = new
+                else:
+                    print(f"Defense {old} not found in {map_name}")
+
+                # change round site names in rec.maps[map_name].rounds
+                for round in rec.maps[map_name].rounds.values():
+                    if round.site == old:
+                        round.site = new
 
     return rec

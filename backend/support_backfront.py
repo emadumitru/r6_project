@@ -6,15 +6,15 @@ def load_rec():
     rec = Recommender().load()
     return rec
 
-def update_rec(rec, game):
-    rec.add_game(game)
+def update_rec(rec, game, rounds):
+    rec.add_game(game, rounds)
     rec.save()
     return rec
 
 def get_site_for_map(rec, map_name):
     if map_name not in rec.maps:
         return []
-    sites = rec.maps[map_name].sites.values()
+    sites = rec.maps[map_name].sites["Attack"].values()
     sites = [site.name for site in sites]
     return list(set(sites))
 
@@ -67,9 +67,9 @@ def pass_on_rounds_game(rounds, map_name, ban_a_us, ban_a_op, ban_d_us, ban_d_op
 
     clean_inoput = form_input_clean(aggregated_dictionary)
 
-    game = create_game_and_rounds(clean_inoput)
+    game, rounds = create_game_and_rounds(clean_inoput)
 
-    return game
+    return game, rounds
             
 
 

@@ -14,7 +14,8 @@ class PS:
         self.diffuser = player_data['diffuser']         # True if player planted/diffused the diffuser
         self.cluth = player_data['cluth']               # True if player clutched this round
         self.kos = self.get_kos()                       # 1 if (kills > 0 or survived or diffuser), otherwise 0
-        ##TODO: add more calculated attributes
+        
+        ##TODO: add more calculated attributes + add function to apply on old data
 
     def get_kos(self):
         if self.kills == None:

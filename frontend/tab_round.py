@@ -24,6 +24,7 @@ defenders = load_operators(defenders_json_path)
 
 # Function to initialize session state for rounds if not already set
 def initialize_session_state():
+    """Initialize session state variables if not already set."""
     if "rounds" not in st.session_state:
         st.session_state["rounds"] = []
     if "current_round" not in st.session_state:
@@ -54,22 +55,23 @@ def initialize_session_state():
             }
         }
     if "name_sites" not in st.session_state:
-        # Initialize name_sites with some default values if not already set
         st.session_state["name_sites"] = ["Site 1", "Site 2", "Site 3", "Site 4"]
+    if "current_side" not in st.session_state:
+        st.session_state["current_side"] = None  # To track the side change
 
 # Function to display operator selection using clickable images
 def display_operator_selection(player_name, operators_dict):
     st.subheader(f"{player_name}'s Round")
     st.write("##### Operator")
 
+    # Ensure unique session state for each player's operator based on side
     if f"{player_name}_selected_operator" not in st.session_state:
         st.session_state[f"{player_name}_selected_operator"] = None
 
-    # Prepare operator names and images
     operator_names = list(operators_dict.keys())
     images = [operators_dict[name] for name in operator_names]
 
-    # Display clickable images and get the index of the clicked image
+    # Display clickable images for the current player only
     clicked = clickable_images(
         images,
         titles=operator_names,
@@ -77,24 +79,24 @@ def display_operator_selection(player_name, operators_dict):
             "display": "flex",
             "justify-content": "left",
             "flex-wrap": "wrap",
-            "gap": "auto"  # Adds some space between images
+            "gap": "auto"
         },
         img_style={
-            "flex": "1 0 14.28%",  # Ensures each image takes exactly 1/7th of the row
-            "max-width": "14.28%",  # Forces exactly 7 images per row
-            "height": "auto",  # Maintains aspect ratio
+            "flex": "1 0 14.28%",
+            "max-width": "14.28%",
+            "height": "auto",
             "cursor": "pointer"
         },
-        key=f"{player_name}_newround_clickable_images",
+        key=f"{player_name}_clickable_images_{st.session_state['current_side']}"  # Ensure unique key per player/side
     )
 
-    # Update session state if an image is clicked
+    # Update session state based on clicked image
     if clicked > -1:
         selected_operator = operator_names[clicked]
         st.session_state[f"{player_name}_selected_operator"] = selected_operator
         st.session_state["current_round"]["players"][player_name]["operator"] = selected_operator
 
-    # Show the currently selected operator
+    # Display the selected operator
     selected_operator = st.session_state[f"{player_name}_selected_operator"]
     if selected_operator:
         st.write(f"Selected Operator: **{selected_operator}**")
@@ -132,10 +134,9 @@ def display_operator_selection(player_name, operators_dict):
         f"Did {player_name} clutch the round?", value=st.session_state["current_round"]["players"][player_name]["clutch"],
         key=f"{player_name}_newround_clutch_checkbox"
     )
-
 def print_round_overview():
     round = st.session_state['current_round']
-    st.write(f'**Round {len(st.session_state.rounds)+1}**: {round["site"]} - {round["side"]} - {"Win" if round["win"] else "Loss"}')
+    st.write(f'**Round {len(st.session_state.rounds)+1}**: {round["site"]} - {round["side"]} - {"Win" if round["win"] else "Loss"} - {round["endcondition"]}')
     ema = round["players"]["Ema"]
     mihnea = round["players"]["Mihnea"]
 
@@ -146,10 +147,10 @@ def print_round_overview():
     # Display player data in a nicely formatted table
     st.markdown(
         """
-        | **Player** | **Operator** | **Kills** | **Assists** | **Survived** | **EntryFrag** | **Diffuser** | **Clutch** |
-        |------------|-------------------|-----------|-------------|---------------|----------------|--------------|------------|
-        | **Ema**    | {ema_operator} | {ema_kills} | {ema_assists} | {ema_surv} | {ema_ef} | {ema_dif} | {ema_cl} |
-        | **Mihnea** | {mihnea_operator} | {mihnea_kills} | {mihnea_assists} | {mihnea_surv} | {mihnea_ef} | {mihnea_dif} | {mihnea_cl} |
+        | **Player** | **Operator** | **Kills** | **Assists** | **Survived** | **EntryFrag** | **Diffuser** | **Clutch** | **TKills** | **TDeaths** | **TAssists** |
+        |------------|-------------------|-----------|-------------|---------------|----------------|--------------|------------|-|-|-|
+        | **Ema**    | {ema_operator} | {ema_kills} | {ema_assists} | {ema_surv} | {ema_ef} | {ema_dif} | {ema_cl} | {ema_tkills} | {ema_tdeaths} | {ema_tassists} |
+        | **Mihnea** | {mihnea_operator} | {mihnea_kills} | {mihnea_assists} | {mihnea_surv} | {mihnea_ef} | {mihnea_dif} | {mihnea_cl} | {mihnea_tkills} | {mihnea_tdeaths} | {mihnea_tassists} |
         """.format(
             ema_operator=ema["operator"],
             ema_kills=ema["kills"],
@@ -158,6 +159,9 @@ def print_round_overview():
             ema_ef=icon(ema["entryfrag"]),
             ema_dif=icon(ema["diffuser"]),
             ema_cl=icon(ema["clutch"]),
+            ema_tkills=ema["kills"]+sum([int(r["players"]["Ema"]["kills"]) for r in st.session_state["rounds"]]),
+            ema_tdeaths=(not ema["survived"])+(sum([(not r["players"]["Ema"]["survived"]) for r in st.session_state["rounds"]])),
+            ema_tassists=ema["assists"]+sum([int(r["players"]["Ema"]["assists"]) for r in st.session_state["rounds"]]),
             mihnea_operator=mihnea["operator"],
             mihnea_kills=mihnea["kills"],
             mihnea_assists=mihnea["assists"],
@@ -165,84 +169,74 @@ def print_round_overview():
             mihnea_ef=icon(mihnea["entryfrag"]),
             mihnea_dif=icon(mihnea["diffuser"]),
             mihnea_cl=icon(mihnea["clutch"]),
+            mihnea_tkills=mihnea["kills"]+sum([int(r["players"]["Mihnea"]["kills"]) for r in st.session_state["rounds"]]),
+            mihnea_tdeaths=(not mihnea["survived"])+(sum([(not r["players"]["Mihnea"]["survived"]) for r in st.session_state["rounds"]])),
+            mihnea_tassists=mihnea["assists"]+sum([int(r["players"]["Mihnea"]["assists"]) for r in st.session_state["rounds"]])
         )
     )
+    len_rounds = len(st.session_state['rounds']) + 1
+    score_us = len([round for round in st.session_state['rounds'] if round['win']]) + round['win']
+    score_op = len_rounds - score_us
+    st.write(f'Current score: {score_us} - {score_op}')
 
-# Function to add a new round form
 def add_new_round():
-
     # Initialize session state for rounds
     initialize_session_state()
 
+    st.write(f"#### Round {len(st.session_state['rounds']) + 1}")
 
-    # Round Information with Side and Result side by side
-    st.subheader(f"Round {len(st.session_state.rounds)+1} Information")
+    # Side selection, updating only if a change is detected to prevent re-renders
     col1, col2 = st.columns(2)
     with col1:
-        st.session_state["current_round"]["side"] = st.radio("Side", ["Attack", "Defense"], key="side", horizontal=True)
+        selected_side = st.radio("Side", ["Attack", "Defense"], key="side", horizontal=True)
+        st.session_state["current_round"]["side"] = selected_side
+
+        # Only change the side if it's different from the previous one
+        if "current_side" not in st.session_state or st.session_state["current_side"] != selected_side:
+            st.session_state["current_side"] = selected_side
+            # Reset the selected operators for the current side to prevent double loading
+            st.session_state["Ema_selected_operator"] = None
+            st.session_state["Mihnea_selected_operator"] = None
+
+            st.write(f"Side changed to {selected_side}. Operators reset.")
+        else:
+            st.write(f"Side unchanged. Current side: {st.session_state['current_side']}")
+
+    # Result and End Condition
     with col2:
-        st.session_state["current_round"]["win"] = st.radio("Result", ["Win", "Loss"], key="round_result", horizontal=True) == "Win"
+        st.session_state["current_round"]["win"] = st.radio(
+            "Result", ["Win", "Loss"], key="round_result", horizontal=True) == "Win"
     st.session_state["current_round"]["endcondition"] = st.radio(
         "End Condition", ["Time Expired", "Wiped Out", "Defused"], key="end_condition", horizontal=True)
-    # Display site options from session state
-    site_options = st.session_state["name_sites"][:]
-    if len(site_options) == 4:
-        st.session_state["current_round"]["site"] = st.radio(
-        "Site", site_options, key="site_full", horizontal=True)
+
+    # Load the correct operator dictionary based on the current side
+    if selected_side == "Attack":
+        operator_dict = attackers
+        st.write("Attackers loaded for operator selection.")
     else:
-        col1, col2 = st.columns([1, 1])
-        with col1:
-            st.session_state["current_round"]["site"] = st.radio(
-            "Site", site_options + ['Other'], key="site_nonfull", horizontal=True)
-        with col2:
-            new_option_site = st.text_input("New Site", key="new_site")
+        operator_dict = defenders
+        st.write("Defenders loaded for operator selection.")
 
-    if st.session_state["current_round"]["site"] == 'Other':
-        if new_option_site:
-            st.session_state["name_sites"].append(new_option_site)
-            st.session_state["current_round"]["site"] = new_option_site
-
-    st.divider()
-
-    # Use the appropriate operator dictionary based on the selected side
-    operator_dict = attackers if st.session_state["current_round"]["side"] == "Attack" else defenders
-
-    # Create containers for each player to manage their layout and updates
+    # Create columns for Ema and Mihnea operator selection
     col1, col2 = st.columns(2)
+    
+    # Ema's column
     with col1:
-        ema_container = st.container()
-    with col2:
-        mihnea_container = st.container()
-
-    # Use the containers to render each player's operator selection and performance input
-    with ema_container:
-        side=st.session_state["current_round"]["side"]
-        st.write(f"Displaying Ema's Selection for **{side}**")  # Debug statement
+        # st.write(f"Displaying Ema's Selection for **{selected_side}**")
         display_operator_selection("Ema", operator_dict)
 
-    with mihnea_container:
-        st.write(f"Displaying Mihnea's Selection for **{side}**")  # Debug statement
+    # Mihnea's column
+    with col2:
+        # st.write(f"Displaying Mihnea's Selection for **{selected_side}**")
         display_operator_selection("Mihnea", operator_dict)
 
-    # # Display operator selection and performance input for each player
-    # col1, col2 = st.columns(2)
-    # with col1:
-    #     side=st.session_state["current_round"]["side"]
-    #     st.write(f"Displaying Ema's Selection for {side}")  # Debug statement
-    #     display_operator_selection("Ema", operator_dict)
-    # with col2:
-    #     st.write("Displaying Mihnea's Selection")  # Debug statement
-    #     display_operator_selection("Mihnea", operator_dict)
-
+    # Print round overview and add submit button
     st.divider()
-
     print_round_overview()
 
-    # Add button to submit the current round data
     if st.button("Submit Round Data", key=f"submit_newround_{len(st.session_state['rounds'])}"):
-        # Append a deep copy of the current round to the list of rounds
-        st.session_state["rounds"].append(deepcopy(st.session_state["current_round"]))        
+        st.session_state["rounds"].append(deepcopy(st.session_state["current_round"]))
         st.success("Round data submitted successfully!")
+        initialize_session_state()  # Re-initialize for the next round
 
-        # Reset the current round data for new input
-        initialize_session_state()
+    

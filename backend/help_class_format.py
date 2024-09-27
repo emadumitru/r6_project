@@ -19,9 +19,9 @@ PS_attributes = {
 Round_attributes = {
     'id': int,                       # Round number, e.g., 1
     'game_id': int,                  # ID of the game, e.g., 101
-    'round_number': int,             # The specific round number in the game, e.g., 3
     'site': str,                     # Site of the round, e.g., 'Kitchen'
-    'side': str,                     # Side played, e.g., 'attack' or 'defense'
+    'side': str,                     # Side played, e.g., 'attack'
+    'round_number': int,             # The specific round number in the game, e.g., 3
     'win': bool,                     # Whether the round was won, e.g., True
     'player_stats': dict[PS],        # Player stats for the round, e.g., {'ema': PS, 'mihnea': PS}
     'rtype': str,                    # Round type, e.g., 'bomb'
@@ -35,6 +35,7 @@ Site_attributes = {
     'side': str,             # Side played on the site, e.g., 'attack'
     'name': str,             # Name of the site, e.g., 'Kitchen'
     'rounds': dict[Round],   # Dictionary of rounds played at the site, e.g., {1: Round}
+    'games_in_site': list,   # List of game IDs played at the site, e.g., [101]
     'statistics': dict       # Win statistics, e.g., {'win': 2, 'winperc': 50.0}
 }
 
@@ -56,9 +57,7 @@ Game_attributes = {
     'gtype': str,            # Game type, e.g., 'ranked'
     'nrounds': int,          # Number of rounds, e.g., 7
     'score': tuple,          # Game score, e.g., (4, 3)
-    'rounds': dict[Round],   # Rounds in the game, e.g., {1: Round}
-    'player_stats': dict,    # Player stats, e.g., {'ema': [PS]}
-    'game_stats': dict       # Game stats summary, e.g., {'kills': 15}
+    'rounds_ids': list       # List of round IDs, e.g., [1, 2, 3, 4, 5, 6, 7]
 }
 
 Recommender_attributes = {
