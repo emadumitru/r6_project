@@ -554,22 +554,22 @@ def old_input_clean_data(rec):
         'Kafe Dostoyevsky': {'1': 'Cocktail', '2': 'Mining', '3': 'Reading', '4': 'Kitchen'},
         'Emerald Plains': {'1': 'CEO', '2': 'Painting', '3': 'Bar', '4': 'Kitchen'},
         # 'Nighthaven Labs': {'1': '', '2': '', '3': '', '4': ''},
-        # 'Bank': {'1': 'CEO', '2': 'Open Area', '3': '', '4': ''},
-        # 'Border': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-        # 'Chalet': {'1': 'Bedroom', '2': ' ', '3': '  ', '4': 'Garage'},
+        'Bank': {'1': 'CEO', '2': 'Open Area', '3': 'Tellers', '4': 'CCTV'},
+        'Border': {'1': 'Armory', '2': 'Workshop', '3': 'Bathroom', '4': 'Customs'},
+        'Chalet': {'1': 'Bedroom', '2': 'Bar/Gaming', '3': 'Kitchen', '4': 'Garage'},
         'Coastline': {'1': 'Hooka', '2': 'Theater', '3': 'Bar', '4': 'Kitchen'},
-        # 'Consulate': {'1': '', '2': ' ', '3': '  ', '4': '   '},
+        'Consulate': {'1': 'Consul Office', '2': 'Piano', '3': 'Servers', '4': 'Garage/Cafeteria'},
         # 'Favela': {'1': '', '2': ' ', '3': '  ', '4': '   '},
         # 'Hereford Base': {'1': '', '2': ' ', '3': '  ', '4': '   '},
         # 'House': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-        # 'Kanal': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-        # 'Oregon': {'1': 'Dorms', '2': '', '3': 'Open Area', '4': 'Basement'},
+        'Kanal': {'1': 'Server', '2': 'Maps', '3': 'Coastguard', '4': 'Kayaks'},
+        'Oregon': {'1': 'Dorms', '2': 'Dining/Kitchen', '3': 'Meeting/Kitchen', '4': 'Basement'},
         'Outback': {'1': 'Laundry', '2': 'Party', '3': 'Green/Red', '4': 'Kitchen'},
         # 'Plane': {'1': '', '2': ' ', '3': '  ', '4': '   '},
         'Skyscraper': {'1': 'Tea Room', '2': 'Exhibition', '3': 'Bedroom', '4': 'BBQ'},
         'Theme Park': {'1': 'Initiation', '2': 'Daycare', '3': 'Throne', '4': 'Lab'},
         # 'Tower': {'1': '', '2': ' ', '3': '  ', '4': '   '},
-        # 'Villa': {'1': 'Aviator', '2': 'Statuary', '3': '', '4': ''},
+        'Villa': {'1': 'Aviator', '2': 'Statuary', '3': 'Library', '4': 'Kitchen'},
         # 'Yacht': {'1': '', '2': ' ', '3': '  ', '4': '   '},
         # 'Lair': {'1': '', '2': ' ', '3': '  ', '4': '   '},
         # 'Stadium': {'1': '', '2': ' ', '3': '  ', '4': '   '}
@@ -589,7 +589,10 @@ def old_input_clean_data(rec):
                         if round.site == old:
                             round.site = new
                 else:
-                    print(f"Attack {old} not found in {map_name}")
+                    if new in rec.maps[map_name].sites["Attack"]:
+                        print(f"Attack {new} already in {map_name}")
+                    else:
+                        print(f"Attack {old} not found in {map_name}")
                 if old in rec.maps[map_name].sites["Defense"]:
                     rec.maps[map_name].sites["Defense"][new] = rec.maps[map_name].sites["Defense"].pop(old)
                     rec.maps[map_name].sites["Defense"][new].name = new
@@ -597,7 +600,10 @@ def old_input_clean_data(rec):
                         if round.site == old:
                             round.site = new
                 else:
-                    print(f"Defense {old} not found in {map_name}")
+                    if new in rec.maps[map_name].sites["Defense"]:
+                        print(f"Defense {new} already in {map_name}")
+                    else:
+                        print(f"Defense {old} not found in {map_name}")
 
                 # change round site names in rec.maps[map_name].rounds
                 for round in rec.maps[map_name].rounds.values():

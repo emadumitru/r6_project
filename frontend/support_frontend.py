@@ -19,13 +19,26 @@ def initialize_session_var():
         st.session_state["balance_random_opperators"] = 50
     if "period_random_opperators" not in st.session_state:
         st.session_state["period_random_opperators"] = "All"
+    if "period_recommender_opperators" not in st.session_state:
+        st.session_state["period_recommender_opperators"] = "All"
     if "season_periods" not in st.session_state:
         st.session_state["season_periods"] = {
             "All": (None, None),
-            "Last Season": (datetime.date(2024, 4, 15), datetime.date(2024, 7, 15)),
-            "2 seasons": (datetime.date(2024, 4, 15), None),
-            "This season": (datetime.date(2024, 7, 15), None)
+            # "Last Season": (datetime.date(2024, 6, 10), datetime.date(2024, 9, 10)),
+            "2 seasons": (datetime.date(2024, 6, 10), None),
+            "This season": (datetime.date(2024, 9, 10), None)
         }
+    if "recommender_periods" not in st.session_state:
+        st.session_state["recommender_periods"] = {
+            "All": (None, None),
+            # "Last Season": (datetime.date(2024, 6, 10), datetime.date(2024, 9, 10)),
+            "2 seasons": (datetime.date(2024, 6, 10), None),
+            "This season": (datetime.date(2024, 9, 10), None)
+        }
+    if "random_opperators" not in st.session_state:
+        st.session_state["random_opperators"] = (None, None, 0, None, None)
+    if "recommended_opperators" not in st.session_state:
+        st.session_state["recommended_opperators"] = (None, None)
 
 
 def load_operators(json_path):

@@ -46,12 +46,12 @@ def recommender_format(opperators):
         st.sidebar.header("Random Opperators")
         # get balancing percentage
         st.session_state.balance_random_opperators = st.sidebar.slider("Balance (random - play#)", 0, 100, 50, 5)
-        st.session_state.period_random_opperators = st.sidebar.select_slider("Period", options=["All", "Last Season", "2 seasons", "This season"], key="timeline_random_opperators")
+        st.session_state.period_random_opperators = st.sidebar.select_slider("Period", options=["All", "2 seasons", "This season"], key="timeline_random_opperators")
 
     if get_recommendations:
         st.sidebar.header("Recommendations")
         # get balancing 
-        
+        st.session_state.period_recommender_opperators = st.sidebar.select_slider("Period", options=["All", "2 seasons", "This season"], key="timeline_recom_opperators")
     
 
     # Main page content

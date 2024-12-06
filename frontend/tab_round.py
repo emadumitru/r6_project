@@ -151,7 +151,7 @@ def print_round_overview():
     # Display player data in a nicely formatted table
     st.markdown(
         """
-        | **Player** | **Operator** | **Kills** | **Assists** | **Survived** | **EntryFrag** | **Diffuser** | **Clutch** | **TKills** | **TDeaths** | **TAssists** |
+        | **Player** | **Operator** | **Kills** | **Ass** | **Surv** | **EnFrag** | **Diffuser** | **Clutch** | **TKills** | **T💀** | **TAss** |
         |------------|-------------------|-----------|-------------|---------------|----------------|--------------|------------|-|-|-|
         | **Ema**    | {ema_operator} | {ema_kills} | {ema_assists} | {ema_surv} | {ema_ef} | {ema_dif} | {ema_cl} | {ema_tkills} | {ema_tdeaths} | {ema_tassists} |
         | **Mihnea** | {mihnea_operator} | {mihnea_kills} | {mihnea_assists} | {mihnea_surv} | {mihnea_ef} | {mihnea_dif} | {mihnea_cl} | {mihnea_tkills} | {mihnea_tdeaths} | {mihnea_tassists} |
@@ -212,6 +212,26 @@ def add_new_round():
             "Result", ["Win", "Loss"], key="round_result", horizontal=True) == "Win"
     st.session_state["current_round"]["endcondition"] = st.radio(
         "End Condition", ["Time Expired", "Wiped Out", "Defused"], key="end_condition", horizontal=True)
+    
+    # Display site options from session state
+    site_options = st.session_state["name_sites"][:]
+    if len(site_options) == 4:
+        st.session_state["current_round"]["site"] = st.radio(
+        "Site", site_options, key="site_full", horizontal=True)
+    else:
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            st.session_state["current_round"]["site"] = st.radio(
+            "Site", site_options + ['Other'], key="site_nonfull", horizontal=True)
+        with col2:
+            new_option_site = st.text_input("New Site", key="new_site")
+
+    if st.session_state["current_round"]["site"] == 'Other':
+        if new_option_site:
+            st.session_state["name_sites"].append(new_option_site)
+            st.session_state["current_round"]["site"] = new_option_site
+    
+    # st.divider()
 
     # Load the correct operator dictionary based on the current side
     if selected_side == "Attack":
@@ -220,6 +240,8 @@ def add_new_round():
     else:
         operator_dict = defenders
         st.write("Defenders loaded for operator selection.")
+
+    st.divider()
 
     # Create columns for Ema and Mihnea operator selection
     col1, col2 = st.columns(2)
